@@ -1,4 +1,4 @@
-// LILYGO LORA RECEPTOR
+// LILYGO LORA RECEPTOR (CON PANTALLA OLED)
 
 #include <SPI.h>
 #include <LoRa.h>
