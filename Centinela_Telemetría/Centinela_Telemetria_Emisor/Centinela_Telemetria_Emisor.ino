@@ -3,7 +3,10 @@
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-//Código EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2, Neo6m integrado, Gy-87, DS18B20.
+Código TRANSMISOR/EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2, Neo6m integrado, Gy-87, DS18B20.
+
+Para la prueba del envio de datos se utilizo este codigo en la placa lilygo ttgo t-beam como transmisor, mientras que se uso la lilygo con pantalla
+como receptor utilizando el codigo "Receptor_2" en la carpeta de pruebas.
 ******************************
 */
 
@@ -12,45 +15,35 @@ Código desarrollado por Electrónica Rovers
 #include <SPI.h>
 #include <LoRa.h>
 
+//Declaramos configuración de pines 
 #define TBEAM_GY87
 #include "Declaracion_Pines_Telemetria.h"
 
-#define BAUD_RATE 115200
+//Banda Lora actual 915E6 ----- Modificar en archivo .h
+
+unsigned int contador = 0;  //Contador de prueba.
+unsigned int mensaje = 0;
 
 void setup() 
 {
+  //Inicializamos monitor serial
   Serial.begin(115200);
-  delay(3000);
+  while(!Serial);
+
   inicializarLora();
 }
 
-unsigned int counter = 0;
 void loop() 
 {
-  Serial.println(String(counter));
+  // Texto en monitor serial
+  Serial.print("Enviando paquete: ");
+  Serial.println(contador);
 
-  //enviar paquete
-  LoRa.beginPacket();
-  LoRa.print("hello ");
-  LoRa.print(counter);
-  LoRa.endPacket();
+  mensaje = contador;
 
-  counter++;
-  delay(1000);
-}
+  sendMessage(String(mensaje));   //Enviar mensaje
 
-void inicializarLora()
-{
-   // Iniciar LoRa
-  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
-  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
-
-  // Chequeo rapido
-  if (!LoRa.begin(BAND)) 
-  {
-    Serial.println("Fallo al iniciar LoRa");
-    while (1);
-  }
-  Serial.println("LoRa iniciado");
-  delay(1500);  
+  contador++; // Incrementar el contador
+  
+  delay(1000); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
 }
