@@ -90,3 +90,12 @@ void avanzar(int velocidad)
   back_left_motor.forward(velocidad);
   back_right_motor.forward(velocidad);
 }
+void retroceder(int velocidad)
+{
+  front_left_motor.backward(velocidad);
+  front_right_motor.backward(velocidad);
+  middle_left_motor.backward(velocidad);
+  middle_right_motor.backward(velocidad);
+  back_left_motor.backward(velocidad);
+  back_right_motor.backward(velocidad);
+}
