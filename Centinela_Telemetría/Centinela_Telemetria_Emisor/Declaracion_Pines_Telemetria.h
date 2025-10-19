@@ -16,7 +16,7 @@ Archivo header con la declaración de pines y configuración inicial para el mó
 #define TELEMETRIA_H
 
 //Declaracion de pines y configuración inicial para la telemetría usando la placa LilyGo TTGO T-Beam V1.2.
-#ifdef TBEAM_GY87
+#ifdef TBEAM_MPU6050
   //Baud rate de esp32
   #define BAUD_RATE 115200
 

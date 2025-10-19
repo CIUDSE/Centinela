@@ -3,10 +3,13 @@
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-Código TRANSMISOR/EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2, Neo6m integrado, Gy-87, DS18B20.
+Código TRANSMISOR/EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2, Neo6m integrado, MPU 6050, DS18B20.
 
-Para la prueba del envio de datos se utilizo este codigo en la placa lilygo ttgo t-beam como transmisor, mientras que se uso la lilygo con pantalla
+Para la prueba del envio de datos se utilizo este código en la placa lilygo ttgo t-beam como transmisor, mientras que se uso la lilygo con pantalla
 como receptor utilizando el codigo "Receptor_2" en la carpeta de pruebas.
+
+Librerias necesarias:
+LoRa by Sandeep Mistry
 ******************************
 */
 
@@ -16,10 +19,9 @@ como receptor utilizando el codigo "Receptor_2" en la carpeta de pruebas.
 #include <LoRa.h>
 
 //Declaramos configuración de pines 
-#define TBEAM_GY87
+#define TBEAM_MPU6050
 #include "Declaracion_Pines_Telemetria.h"
-
-//Banda Lora actual 915E6 ----- Modificar en archivo .h
+//Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
 unsigned int contador = 0;  //Contador de prueba.
 unsigned int mensaje = 0;
@@ -27,7 +29,7 @@ unsigned int mensaje = 0;
 void setup() 
 {
   //Inicializamos monitor serial
-  Serial.begin(115200);
+  Serial.begin(BAUD_RATE);
   while(!Serial);
 
   inicializarLora();
