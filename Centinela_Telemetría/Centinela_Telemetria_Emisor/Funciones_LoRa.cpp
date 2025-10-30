@@ -3,12 +3,12 @@
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-Archivo cpp con la declaración de funciones para el módulo de telemetría TRANSMISOR/EMISOR implementando LilyGo TTGO T-Beam V1.2
+Archivo cpp con la declaración de funciones de LORA para el módulo de telemetría TRANSMISOR/EMISOR implementando LilyGo TTGO T-Beam V1.2
 ******************************
 */
 
-#define TBEAM_GY87
-#include "Declaracion_Pines_Telemetria.h"
+#define Pines_Telemetria
+#include "Telemetria_Emisor.h"
 
 //Función para inicilizar el módulo LORA esp32
 void inicializarLora()
@@ -33,19 +33,12 @@ void inicializarLora()
   LoRa.setSpreadingFactor(7);     // Mínimo SF para máx velocidad
   LoRa.setSignalBandwidth(500E3); // Máximo BW para máx velocidad
   
-  if(Serial)
-    Serial.println("LoRa iniciado!");  
+  sendMessage("LoRa inicializado correctamente"); delay(time_delay); 
 }
 
 void sendMessage(String message)
 {
-  // 1. Iniciar el paquete de LoRa
-  LoRa.beginPacket();
-
-  // 2. Escribir el contenido del mensaje
-  LoRa.print("Hola LoRa, contador: ");
-  LoRa.print(message);
-
-  // 3. Finalizar el paquete y enviarlo
-  LoRa.endPacket();
+  LoRa.beginPacket();     // 1. Iniciar el paquete de LoRa
+  LoRa.print(message);    // 2. Escribir el contenido del mensaje
+  LoRa.endPacket();       // 3. Finalizar el paquete y enviarlo
 }

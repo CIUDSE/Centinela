@@ -13,39 +13,34 @@ LoRa by Sandeep Mistry
 ******************************
 */
 
+//#define SERIAL_MONITOR
+
 //Protocolos de comunicación
 #include <Wire.h>
 #include <SPI.h>
 #include <LoRa.h>
 
 //Declaramos configuración de pines 
-#define TBEAM_MPU6050
-#include "Declaracion_Pines_Telemetria.h"
+#define Pines_Telemetria
+#include "Telemetria_Emisor.h"
 //Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
-unsigned int contador = 0;  //Contador de prueba.
-unsigned int mensaje = 0;
+String mensaje = "";
 
 void setup() 
 {
-  //Inicializamos monitor serial
-  Serial.begin(BAUD_RATE);
-  while(!Serial);
-
   inicializarLora();
+  inicializarGY87();  //Inicializa I2C automaticamente
 }
 
 void loop() 
 {
-  // Texto en monitor serial
-  Serial.print("Enviando paquete: ");
-  Serial.println(contador);
-
-  mensaje = contador;
-
-  sendMessage(String(mensaje));   //Enviar mensaje
-
-  contador++; // Incrementar el contador
+  leerAceleracion();
+  leerGiroscopio();
   
-  delay(1000); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
+  mensaje = crearMensaje();
+
+  sendMessage(mensaje);   //Enviar mensaje
+  
+  delay(500); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
 }
