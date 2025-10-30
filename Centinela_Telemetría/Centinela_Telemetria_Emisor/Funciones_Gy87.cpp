@@ -77,17 +77,17 @@ void leerGiroscopio()
 
   Wire.requestFrom(0x68,6); //Request Gyro Registers (43 - 48)
   while(Wire.available() < 6);
-  gyroX = (int16_t)(Wire.read()<<8|Wire.read()); //Store first two bytes into accelX
-  gyroY = (int16_t)(Wire.read()<<8|Wire.read()); //Store middle two bytes into accelY
-  gyroZ = (int16_t)(Wire.read()<<8|Wire.read()); //Store last two bytes into accelZ
+  RAW_gyroX = (int16_t)(Wire.read()<<8|Wire.read()); //Store first two bytes into accelX
+  RAW_gyroY = (int16_t)(Wire.read()<<8|Wire.read()); //Store middle two bytes into accelY
+  RAW_gyroZ = (int16_t)(Wire.read()<<8|Wire.read()); //Store last two bytes into accelZ
   processGyroData();
 }
 
 void processGyroData() 
 {
-  rotX = gyroX / 131.0;
-  rotY = gyroY / 131.0; 
-  rotZ = gyroZ / 131.0;
+  rotX = RAW_gyroX / 131.0;
+  rotY = RAW_gyroY / 131.0; 
+  rotZ = RAW_gyroZ / 131.0;
 }
 
 void processAccelData()

@@ -41,7 +41,7 @@ extern int time_delay;
 extern int16_t RAW_accelX, RAW_accelY, RAW_accelZ;
 extern float accelX, accelY, accelZ;
 
-extern int16_t gyroX, gyroY, gyroZ;
+extern int16_t RAW_gyroX, RAW_gyroY, RAW_gyroZ;
 extern float rotX, rotY, rotZ;
 
 //------------------------------------------------------------------------------//
