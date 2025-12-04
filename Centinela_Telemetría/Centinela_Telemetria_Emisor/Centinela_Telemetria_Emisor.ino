@@ -15,21 +15,19 @@ LoRa by Sandeep Mistry
 
 //#define SERIAL_MONITOR
 
-//Protocolos de comunicación
-#include <Wire.h>
-#include <SPI.h>
-#include <LoRa.h>
-
 //Declaramos configuración de pines 
 #define Pines_Telemetria
 #include "Telemetria_Emisor.h"
 //Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
+TinyGPSPlus gps_tbeam;
+
 String mensaje = "";
 
 void setup() 
 {
-  inicializarLora();
+  pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion(); //Inicializa buzzer
+  inicializarLora();  //Función para inicializar LoRa.
   inicializarGY87();  //Inicializa I2C automaticamente
 }
 

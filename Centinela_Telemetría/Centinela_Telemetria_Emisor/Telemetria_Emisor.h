@@ -8,11 +8,12 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
 ******************************
 */
 
-//Protocolos de comunicación
+//Librerias
 #include <cstdint>
 #include <Wire.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <TinyGPS++.h>
 
 #ifndef TELEMETRIA_H
 #define TELEMETRIA_H
@@ -22,6 +23,12 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
 #ifdef Pines_Telemetria
   //Baud rate de esp32
   #define BAUD_RATE 115200
+
+  //Pin de buzzer
+  #define PIN_BUZZER 32
+  #ifndef BUZZER
+  #define BUZZER
+  #endif
 
   //Banda LORA
   #define BAND 915E6
@@ -49,6 +56,10 @@ extern float rotX, rotY, rotZ;
 //Funciones Globales
 String crearMensaje();
 
+void tonoBuzzerActivacion();
+void tonoBuzzerCorrecto();
+void tonoBuzzerError();
+
 //Funciones Lora
 void inicializarLora();
 void sendMessage(String message);
@@ -59,6 +70,14 @@ void leerAceleracion();
 void leerGiroscopio();
 void processGyroData();
 void processAccelData();
+
+//Funciones GPS integrado en la placa T-Beam
+void inicializarGPS_TBEAM();
+void leerGPS_TBEAM();
+
+//Funciones GPS1
+void inicializarGPS1();
+void leerGPS1();
 
 //------------------------------------------------------------------------------//
 

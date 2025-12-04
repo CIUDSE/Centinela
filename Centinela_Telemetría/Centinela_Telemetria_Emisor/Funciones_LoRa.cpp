@@ -20,6 +20,10 @@ void inicializarLora()
   // Chequeo rapido
   if (!LoRa.begin(BAND)) 
   {
+    #ifdef BUZZER
+      tonoBuzzerError();
+    #endif
+    
     if(Serial)
       Serial.println("Fallo al iniciar LoRa");
     while (1);
@@ -34,6 +38,9 @@ void inicializarLora()
   LoRa.setSignalBandwidth(500E3); // Máximo BW para máx velocidad
   
   sendMessage("LoRa inicializado correctamente"); delay(time_delay); 
+  #ifdef BUZZER
+    tonoBuzzerCorrecto();
+  #endif
 }
 
 void sendMessage(String message)

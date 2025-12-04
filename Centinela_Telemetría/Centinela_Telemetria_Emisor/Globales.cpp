@@ -40,3 +40,50 @@ String crearMensaje()
 
   return msg;
 }
+
+void tonoBuzzerActivacion()
+{
+  // 3 Beeps.  Largo - Corto - Corto
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(800);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(100);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(100);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+}
+
+void tonoBuzzerCorrecto()
+{
+  // 3 Beeps.  Corto - Corto - Corto
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(100);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(100);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(100);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+}
+
+void tonoBuzzerError()
+{
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(800);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(200);
+  digitalWrite(PIN_BUZZER, HIGH);
+  delay(800);
+  digitalWrite(PIN_BUZZER, LOW);
+  delay(100);
+
+}

@@ -28,31 +28,36 @@ void inicializarGY87()
 
     String msg = "WHO_AM_I = 0x";
     msg += String(who, HEX);
+    sendMessage(msg); delay(time_delay);  //I2C Inicializado
 
-    sendMessage(msg); delay(time_delay);
+    Wire.beginTransmission(0x68); //This is the I2C address of the MPU (b1101000/b1101001 or 0x68/0x69 for AC0 low/high datasheet sec. 9.2)
+    Wire.write(0x6B); //Accessing the register 6B - Power Management (Sec. 4.28)
+    Wire.write(0x00); //Setting SLEEP register to 0. (Required; see Note on p. 9)
+    Wire.endTransmission();  
+
+    Wire.beginTransmission(0x68); //I2C address of the MPU
+    Wire.write(0x1B); //Accessing the register 1B - Gyroscope Configuration (Sec. 4.4) 
+    Wire.write(0x00); //Setting the gyro to full scale +/- 250deg./s 
+    Wire.endTransmission(); 
+
+    Wire.beginTransmission(0x68); //I2C address of the MPU
+    Wire.write(0x1C); //Accessing the register 1C - Acccelerometer Configuration (Sec. 4.5) 
+    Wire.write(0x00); //Setting the accel to +/- 2g
+    Wire.endTransmission(); 
+
+    sendMessage("GY87 inicializado correctamente."); delay(time_delay);
+    #ifdef BUZZER
+      tonoBuzzerCorrecto();
+    #endif
   } 
   else 
   {
     //Serial.println("No responde WHO_AM_I. Revisa I2C/dirección.");
     sendMessage("No responde WHO_AM_I. Revisa I2C/dirección.");
+    #ifdef BUZZER
+      tonoBuzzerError();
+    #endif
   }
-
-  Wire.beginTransmission(0x68); //This is the I2C address of the MPU (b1101000/b1101001 or 0x68/0x69 for AC0 low/high datasheet sec. 9.2)
-  Wire.write(0x6B); //Accessing the register 6B - Power Management (Sec. 4.28)
-  Wire.write(0x00); //Setting SLEEP register to 0. (Required; see Note on p. 9)
-  Wire.endTransmission();  
-
-  Wire.beginTransmission(0x68); //I2C address of the MPU
-  Wire.write(0x1B); //Accessing the register 1B - Gyroscope Configuration (Sec. 4.4) 
-  Wire.write(0x00); //Setting the gyro to full scale +/- 250deg./s 
-  Wire.endTransmission(); 
-
-  Wire.beginTransmission(0x68); //I2C address of the MPU
-  Wire.write(0x1C); //Accessing the register 1C - Acccelerometer Configuration (Sec. 4.5) 
-  Wire.write(0x00); //Setting the accel to +/- 2g
-  Wire.endTransmission(); 
-
-  sendMessage("GY87 inicializado correctamente."); delay(time_delay);
 }
 
 void leerAceleracion()
