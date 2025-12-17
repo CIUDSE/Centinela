@@ -1,5 +1,4 @@
-/*
-*****************************
+/***************************************************************************************************************************************************
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
@@ -10,8 +9,10 @@ como receptor utilizando el codigo "Receptor_2" en la carpeta de pruebas.
 
 Librerias necesarias:
 LoRa by Sandeep Mistry
-******************************
-*/
+OneWire
+DallasTemperature
+TinyGPS+
+**************************************************************************************************************************************************/
 
 //#define SERIAL_MONITOR
 
@@ -20,7 +21,8 @@ LoRa by Sandeep Mistry
 #include "Telemetria_Emisor.h"
 //Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
-TinyGPSPlus gps_tbeam;
+//Declaración de objetos
+TinyGPSPlus gps_tbeam;      //GPS
 
 String mensaje = "";
 
@@ -28,14 +30,16 @@ void setup()
 {
   pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion(); //Inicializa buzzer
   inicializarLora();  //Función para inicializar LoRa.
-  inicializarGY87();  //Inicializa I2C automaticamente
+  inicializarGY87();  //Inicializa I2C automaticamente.
+  inicializarDS18B20(); //Inicializa los sensores de temperatura.
 }
 
 void loop() 
 {
   leerAceleracion();
   leerGiroscopio();
-  
+  leerDS18B20();
+
   mensaje = crearMensaje();
 
   sendMessage(mensaje);   //Enviar mensaje

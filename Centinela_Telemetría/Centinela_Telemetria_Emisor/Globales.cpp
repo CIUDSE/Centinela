@@ -18,6 +18,17 @@ float accelX, accelY, accelZ;                 //Valores en m/s^2
 int16_t RAW_gyroX, RAW_gyroY, RAW_gyroZ;      //Valores RAW
 float rotX, rotY, rotZ;                       //Valores en °/s
 
+float temp1;
+float temp2;
+float temp3;
+float temp4;
+float temp5;
+float temp6;
+float temp7;
+float temp8;
+float temp9;
+float temp10;
+
 int time_delay = 1000;
 
 String msg = "";
@@ -36,6 +47,10 @@ String crearMensaje()
   msg += String(rotY);
   msg += ",";
   msg += String(rotZ);
+  msg += ",";
+  msg += String(temp1);
+  msg += ",";
+  msg += String(temp2);
   msg += ",";
 
   return msg;

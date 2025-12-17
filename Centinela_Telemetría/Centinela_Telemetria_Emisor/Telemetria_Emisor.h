@@ -1,12 +1,10 @@
-/*
-*****************************
+/******************************************************************************************************************************
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
 Archivo header con la declaración de pines y configuración inicial para el módulo de telemetría TRANSMISOR/EMISOR implementando 
 LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores de temperatura DS18B20.
-******************************
-*/
+*******************************************************************************************************************************/
 
 //Librerias
 #include <cstdint>
@@ -14,6 +12,8 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
 #include <SPI.h>
 #include <LoRa.h>
 #include <TinyGPS++.h>
+#include <OneWire.h>                
+#include <DallasTemperature.h>
 
 #ifndef TELEMETRIA_H
 #define TELEMETRIA_H
@@ -30,6 +30,9 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
   #define BUZZER
   #endif
 
+  //Pin DS18B20 (Sensores de temperatura)
+  extern OneWire ourWire;
+
   //Banda LORA
   #define BAND 915E6
 
@@ -42,6 +45,9 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
   #define LORA_DIO0 26    //IRQ (Interrupt Request)
 #endif
 
+//Constantes
+#define DS18B20_RESOLUTION 9
+
 //Variables globales
 extern int time_delay;
 
@@ -50,6 +56,20 @@ extern float accelX, accelY, accelZ;
 
 extern int16_t RAW_gyroX, RAW_gyroY, RAW_gyroZ;
 extern float rotX, rotY, rotZ;
+
+extern float temp1;
+extern float temp2;
+extern float temp3;
+extern float temp4;
+extern float temp5;
+extern float temp6;
+extern float temp7;
+extern float temp8;
+extern float temp9;
+extern float temp10;
+
+//Objetos
+extern DallasTemperature sensors; //Declaración de sensores de temperatura
 
 //------------------------------------------------------------------------------//
 
@@ -78,6 +98,10 @@ void leerGPS_TBEAM();
 //Funciones GPS1
 void inicializarGPS1();
 void leerGPS1();
+
+//Funciones DS18B20
+void inicializarDS18B20();
+void leerDS18B20();
 
 //------------------------------------------------------------------------------//
 
