@@ -12,6 +12,7 @@ LilyGo TTGO T-Beam V1.2, Módulo GY87, GPS Neo6m integrado y externo, sensores d
 #include <SPI.h>
 #include <LoRa.h>
 #include <TinyGPS++.h>
+#include <XPowersLib.h>
 #include <OneWire.h>                
 #include <DallasTemperature.h>
 
@@ -67,6 +68,12 @@ extern float temp7;
 extern float temp8;
 extern float temp9;
 extern float temp10;
+
+extern float gps1_lat;
+extern float gps1_lon;
+
+extern float gps2_lat;
+extern float gps2_lon;
 
 //Objetos
 extern DallasTemperature sensors; //Declaración de sensores de temperatura

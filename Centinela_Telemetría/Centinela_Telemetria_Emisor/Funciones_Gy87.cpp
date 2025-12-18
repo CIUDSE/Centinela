@@ -13,7 +13,6 @@ Link del video sobre como usar los registros: https://youtu.be/M9lZ5Qy5S2s?si=_7
 //Funcion para establecer comunicación con el MPU e incializar los registros
 void inicializarGY87()
 {
-  Wire.begin(); //Inicializar I2C
 
   // Verificar WHO_AM_I
   Wire.beginTransmission(0x68);

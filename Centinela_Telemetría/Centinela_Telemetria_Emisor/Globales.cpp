@@ -29,6 +29,15 @@ float temp8;
 float temp9;
 float temp10;
 
+float gps1_lat = -1.0;
+float gps1_lon = -1.0;
+
+float gps2_lat = -1.0;
+float gps2_lon = -1.0;
+
+extern float gps2_lat;
+extern float gps2_lon;
+
 int time_delay = 1000;
 
 String msg = "";
@@ -51,6 +60,14 @@ String crearMensaje()
   msg += String(temp1);
   msg += ",";
   msg += String(temp2);
+  msg += ",";
+  msg += String(gps1_lat);
+  msg += ",";
+  msg += String(gps1_lon);
+  msg += ",";
+  msg += String(gps2_lat);
+  msg += ",";
+  msg += String(gps2_lon);
   msg += ",";
 
   return msg;
