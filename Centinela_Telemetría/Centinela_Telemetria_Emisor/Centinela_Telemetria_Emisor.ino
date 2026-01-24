@@ -1,5 +1,4 @@
-/*
-*****************************
+/***************************************************************************************************************************************************
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
@@ -10,42 +9,115 @@ como receptor utilizando el codigo "Receptor_2" en la carpeta de pruebas.
 
 Librerias necesarias:
 LoRa by Sandeep Mistry
-******************************
-*/
+OneWire
+DallasTemperature
+TinyGPS+
+**************************************************************************************************************************************************/
 
-//Protocolos de comunicación
-#include <Wire.h>
-#include <SPI.h>
-#include <LoRa.h>
+//#define SERIAL_MONITOR
 
 //Declaramos configuración de pines 
-#define TBEAM_MPU6050
-#include "Declaracion_Pines_Telemetria.h"
+#define Pines_Telemetria
+#include "Telemetria_Emisor.h"
 //Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
-unsigned int contador = 0;  //Contador de prueba.
-unsigned int mensaje = 0;
+/* =====================================================
+   CONFIGURACIÓN GPS
+   ===================================================== */
+// GPS 1 (UART1)
+#define GPS1_RX_PIN 34
+#define GPS1_TX_PIN 12
+#define GPS1_BAUD   9600
+
+// GPS 2 (UART2)
+#define GPS2_RX_PIN 35
+#define GPS2_TX_PIN 33
+#define GPS2_BAUD   9600
+
+/* =====================================================
+   CONFIGURACIÓN I2C
+   ===================================================== */
+#define I2C_SDA 21
+#define I2C_SCL 22
+
+
+/* =====================================================
+   OBJETOS
+   ===================================================== */
+TinyGPSPlus gps1;
+TinyGPSPlus gps2;
+
+HardwareSerial SerialGPS1(1);
+HardwareSerial SerialGPS2(2);
+
+XPowersAXP2101 *PMU = nullptr;
+
+String mensaje = "";
+
+
+
 
 void setup() 
 {
-  //Inicializamos monitor serial
-  Serial.begin(BAUD_RATE);
-  while(!Serial);
+  pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion(); //Inicializa buzzer
+  inicializarLora();  //Función para inicializar LoRa.
 
-  inicializarLora();
+  Wire.begin(I2C_SDA, I2C_SCL, 400000);
+  setupPMU();
+
+  inicializarGY87();  //Inicializa I2C automaticamente.
+  inicializarDS18B20(); //Inicializa los sensores de temperatura.
+
+  
+  SerialGPS1.begin(GPS1_BAUD, SERIAL_8N1, GPS1_RX_PIN, GPS1_TX_PIN);
+  SerialGPS2.begin(GPS2_BAUD, SERIAL_8N1, GPS2_RX_PIN, GPS2_TX_PIN);
+
 }
 
 void loop() 
 {
-  // Texto en monitor serial
-  Serial.print("Enviando paquete: ");
-  Serial.println(contador);
+   /* ---------- GPS ---------- */
+  while (SerialGPS1.available()) gps1.encode(SerialGPS1.read());
+  while (SerialGPS2.available()) gps2.encode(SerialGPS2.read());
 
-  mensaje = contador;
+  /* ---------- OUTPUT ---------- */
+  if (gps1.location.isUpdated()) 
+  {
+    
+    gps1_lat = gps1.location.lat();
+    gps1_lon = gps1.location.lng();
+  }
 
-  sendMessage(String(mensaje));   //Enviar mensaje
+  if (gps2.location.isUpdated()) 
+  {
+    gps2_lat = gps2.location.lat();
+    gps2_lon = gps2.location.lng();
+  }
 
-  contador++; // Incrementar el contador
+  leerAceleracion();
+  leerGiroscopio();
+  leerDS18B20();
+
+  mensaje = crearMensaje();
+
+  sendMessage(mensaje);   //Enviar mensaje
   
-  delay(1000); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
+  delay(500); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
+}
+
+
+void setupPMU()
+{
+  PMU = new XPowersAXP2101(Wire);
+
+  if (!PMU->init()) {
+    
+    delete PMU;
+    PMU = nullptr;
+    return;
+  }
+
+  // Alimentar GPS1 desde ALDO3
+  PMU->setALDO3Voltage(3300);
+  PMU->enableALDO3();
 }
