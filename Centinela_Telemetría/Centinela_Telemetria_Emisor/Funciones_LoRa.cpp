@@ -18,10 +18,6 @@ void inicializarLora()
   // Chequeo rapido
   if (!LoRa.begin(BAND)) 
   {
-    #ifdef BUZZER
-      tonoBuzzerError();
-    #endif
-    
     if(Serial)
       Serial.println("Fallo al iniciar LoRa");
     while (1);
@@ -35,15 +31,15 @@ void inicializarLora()
   LoRa.setSpreadingFactor(7);     // Mínimo SF para máx velocidad
   LoRa.setSignalBandwidth(500E3); // Máximo BW para máx velocidad
   
-  sendMessage("LoRa inicializado correctamente"); delay(time_delay); 
-  #ifdef BUZZER
-    tonoBuzzerCorrecto();
-  #endif
+  //sendMessage("LoRa inicializado correctamente"); delay(time_delay); 
 }
 
-void sendMessage(String message)
+void enviarDatos()
 {
-  LoRa.beginPacket();     // 1. Iniciar el paquete de LoRa
-  LoRa.print(message);    // 2. Escribir el contenido del mensaje
-  LoRa.endPacket();       // 3. Finalizar el paquete y enviarlo
+  uint8_t buffer[sizeof(telemetryData)];
+  memcpy(buffer, &telemetryData, sizeof(telemetryData));  
+
+  LoRa.beginPacket();                    // 1. Iniciar el paquete de LoRa
+  LoRa.write(buffer, sizeof(buffer));    // 2. Escribir el contenido del mensaje
+  LoRa.endPacket();                      // 3. Finalizar el paquete y enviarlo
 }

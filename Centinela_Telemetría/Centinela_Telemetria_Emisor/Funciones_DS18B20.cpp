@@ -26,6 +26,6 @@ void inicializarDS18B20()
 void leerDS18B20()
 {
   sensors.requestTemperatures();   //envía el comando para obtener las temperaturas
-  temp1= sensors.getTempC(address1);//Se obtiene la temperatura en °C del sensor 1
-  temp2= sensors.getTempC(address2);//Se obtiene la temperatura en °C del sensor 2
+  telemetryData.temp[1] = sensors.getTempC(address1);//Se obtiene la temperatura en °C del sensor 1
+  telemetryData.temp[2] = sensors.getTempC(address2);//Se obtiene la temperatura en °C del sensor 2
 }
