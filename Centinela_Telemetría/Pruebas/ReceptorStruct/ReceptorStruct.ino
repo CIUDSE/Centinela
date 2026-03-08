@@ -32,6 +32,34 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); 
 
 // -------------------------------------------------------------------
+#define DS18B20_CANTIDAD 10
+
+typedef struct telemetryData 
+{
+  //Datos GY87
+  float accelX = 0.0;       //Valores en m/s^2
+  float accelY = 0.0;
+  float accelZ = 0.0;
+  float rotX = 0.0;         //Valores en °/s
+  float rotY = 0.0;
+  float rotZ = 0.0;
+  
+  //Datos GPS1 (GPS integrado en placa T-Beam)
+  double lat1 = -1.0;
+  double lon1 = -1.0;
+
+  //Datos GPS2 (GPS externo Neo6m)
+  double lat2 = -1.0;
+  double lon2 = -1.0;
+
+  //Datos DS18B20 (Sensores de temperatura)
+  float temp[DS18B20_CANTIDAD];
+
+}telemetryData_t;
+
+telemetryData_t telemetryData;   //Crear una variable de la estructura
+
+
 
 void setup() 
 {
@@ -79,21 +107,32 @@ void loop()
 {
   int packetSize = LoRa.parsePacket();
 
-  if (packetSize) 
+  if (packetSize == sizeof(telemetryData_t)) 
   {
-    // 1. Leer el mensaje
-    String receivedData = "";
-    while (LoRa.available()) 
-    {
-      receivedData += (char)LoRa.read();
+    uint8_t buffer[sizeof(telemetryData_t)];
+
+    for(int i = 0; i<sizeof(telemetryData_t); i++){ //Recibir todos los datos a la variable buffer
+      buffer[i] = LoRa.read();
     }
+
+    memcpy(&telemetryData,buffer,sizeof(buffer)); //Copiar los datos guardados en buffer a telemetryData
     
     int rssi = LoRa.packetRssi();
     float snr = LoRa.packetSnr();
 
     // 2. Imprimir en el Monitor Serial
     Serial.print("\n-> MENSAJE: ");
-    Serial.println(receivedData);
+    Serial.print(telemetryData.accelX); Serial.print(", ");
+    Serial.print(telemetryData.accelY); Serial.print(", ");
+    Serial.print(telemetryData.accelZ); Serial.print(", ");
+    Serial.print(telemetryData.rotX); Serial.print(", ");
+    Serial.print(telemetryData.rotY); Serial.print(", ");
+    Serial.print(telemetryData.rotZ); Serial.print(", ");
+    Serial.print(telemetryData.lat1); Serial.print(", ");
+    Serial.print(telemetryData.lon1); Serial.print(", ");
+    Serial.print(telemetryData.lat2); Serial.print(", ");
+    Serial.print(telemetryData.lon2); Serial.print(", ");
+    Serial.println(telemetryData.temp[0]);
     Serial.print("   (RSSI: ");
     Serial.print(rssi);
     Serial.print(" dBm | SNR: ");
@@ -101,14 +140,14 @@ void loop()
     Serial.println(")");
 
      // 3. Mostrar en la pantalla OLED
-    updateDisplay(receivedData, rssi, snr);
+    updateDisplay( rssi, snr);
   }
 }
 
 // ------------------------------------------------------------------
 
 // Función para actualizar la pantalla con los datos recibidos
-void updateDisplay(String data, int rssi, float snr) {
+void updateDisplay( int rssi, float snr) {
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
@@ -120,7 +159,18 @@ void updateDisplay(String data, int rssi, float snr) {
   // Datos
   display.setTextSize(1); // Texto más grande para el mensaje
   display.setCursor(0, 15);
-  display.println(data);
+  
+  display.print(telemetryData.accelX); display.print(", ");
+  display.print(telemetryData.accelY); display.print(", ");
+  display.print(telemetryData.accelZ); display.print(", ");
+  display.print(telemetryData.rotX); display.print(", ");
+  display.print(telemetryData.rotY); display.print(", ");
+  display.print(telemetryData.rotZ); display.print(", ");
+  display.print(telemetryData.lat1); display.print(", ");
+  display.print(telemetryData.lon1); display.print(", ");
+  display.print(telemetryData.lat2); display.print(", ");
+  display.print(telemetryData.lon2); display.print(", ");
+  display.println(telemetryData.temp[0]);
   
   // Métricas (Parte inferior)
   display.setTextSize(1);
