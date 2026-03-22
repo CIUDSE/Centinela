@@ -67,8 +67,9 @@ extern "C" void app_main(void)
 
         timeout_count = 0;
         printf("Datos I2C -> x:%u y:%u brakes:%u\n", myLoRa.x, myLoRa.y, myLoRa.brakes);
-        joystick_converter.speed_ms_conversion(myLoRa.x, myLoRa.y, myLoRa.brakes, [&motors]() { motors.motor1_direction_toggle(); });
-        motors.motor1_set_speed(joystick_converter.speed_msy);
+        joystick_converter.speed_ms_conversion(myLoRa.x, myLoRa.y, myLoRa.brakes);
+        motors.motor1_set_speed_signed(joystick_converter.right_speed_ms); // Motor derecho
+        motors.motor2_set_speed_signed(joystick_converter.left_speed_ms);  // Motor izquierdo
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }

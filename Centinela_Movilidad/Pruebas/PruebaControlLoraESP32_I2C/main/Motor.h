@@ -13,6 +13,8 @@ class Driver1 {
         //En este caso para detener el motor se puede poner una velocidad de 0 
         void motor1_set_speed(float speed_ms); //Establece la velocidad del motor 1    
         void motor2_set_speed(float speed_ms); //Establece la velocidad del motor 2
+        void motor1_set_speed_signed(float speed_ms); //Velocidad con signo: positivo adelante, negativo reversa
+        void motor2_set_speed_signed(float speed_ms); //Velocidad con signo: positivo adelante, negativo reversa
         
         float motor_speed_to_dutyCycle(float speed); //Convierte la velocidad en un duty cycle para el PWM donde la velocidad es en m/s
         
@@ -22,6 +24,8 @@ class Driver1 {
         //Cambiar el giro de los motores
         void motor1_direction_toggle(void);
         void motor2_direction_toggle(void);
+        void motor1_set_direction(bool reverse);
+        void motor2_set_direction(bool reverse);
         
     private:
         //Pines para darle corriente los motores 

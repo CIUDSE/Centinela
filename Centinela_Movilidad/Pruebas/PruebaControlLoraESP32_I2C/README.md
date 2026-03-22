@@ -6,15 +6,18 @@ En esta version, el ESP32 funciona como receptor `I2C slave`. Eso significa que 
 
 ## Funcion principal
 
-La velocidad se ajusta por software con funciones como estas:
+El control actual usa dos etapas:
 
 ```cpp
-void motor_set_speed(float speed);
-void motor1_linear_increase(float ts_speed, int time_ms);
+void speed_ms_conversion(uint16_t X_position, uint16_t Y_position, uint8_t brakes);
+void motor1_set_speed_signed(float speed_ms);
+void motor2_set_speed_signed(float speed_ms);
 ```
 
-- `speed`: rango aproximado `0-5 m/s`
-- `motor`: el proyecto contempla 2 motores
+- `speed_ms_conversion(...)`: convierte `x`, `y` y `brakes` en una velocidad para cada motor
+- `motor1_set_speed_signed(...)`: controla el motor derecho
+- `motor2_set_speed_signed(...)`: controla el motor izquierdo
+- `speed`: rango aproximado `-5 a 5 m/s`
 - `DIR`: define el sentido de giro
 - `PWM`: define la potencia aplicada al motor
 
@@ -75,7 +78,20 @@ Configuracion actual tomada de [main/main.cpp](e:\Scripts\C++\Motor_ESP32\main\m
 - `PWM` controla la velocidad
 - `DIR` controla el sentido de giro
 - El ESP32 recibe `x`, `y` y `brakes` por I2C
-- Luego convierte esos valores en una velocidad para el motor
+- `Y` controla avance o reversa
+- `X` controla el giro
+- Se calcula una mezcla diferencial para 2 motores:
+
+```cpp
+right_speed_ms = throttle - turn;
+left_speed_ms  = throttle + turn;
+```
+
+- Convencion de giro actual:
+  - `X > 0`: giro a la derecha
+  - `X < 0`: giro a la izquierda
+- Si una velocidad sale negativa, ese motor gira en reversa
+- Si `brakes != 0`, ambos motores se llevan a `0`
 
 ## Build y flasheo
 
@@ -112,4 +128,5 @@ py -m esptool --chip esp32 --port COM5 --baud 460800 --before default_reset --af
 
 - Pines, direccion I2C y logica principal: [main/main.cpp](e:\Scripts\C++\Motor_ESP32\main\main.cpp)
 - Recepcion I2C slave: [main/Input_LoRa.cpp](e:\Scripts\C++\Motor_ESP32\main\Input_LoRa.cpp)
+- Conversion del joystick a velocidades izquierda/derecha: [main/Joystick.cpp](e:\Scripts\C++\Motor_ESP32\main\Joystick.cpp)
 - Control de motores: [main/Motor.cpp](e:\Scripts\C++\Motor_ESP32\main\Motor.cpp)

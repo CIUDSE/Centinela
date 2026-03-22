@@ -24,6 +24,8 @@ Driver1::Driver1(gpio_num_t nmt1, gpio_num_t nmt2, gpio_num_t dir1, gpio_num_t d
     
     //Configurar los pines para solo salida
     gpio_set_direction(PWM1, GPIO_MODE_OUTPUT), gpio_set_direction(PWM2, GPIO_MODE_OUTPUT), gpio_set_direction(DIR1, GPIO_MODE_OUTPUT), gpio_set_direction(DIR2, GPIO_MODE_OUTPUT);
+    gpio_set_level(DIR1, DIR1_STATE);
+    gpio_set_level(DIR2, DIR2_STATE);
    
     //Configracion del timer para el PWM 
     ledc_timer_config_t timer_config;
@@ -91,6 +93,22 @@ void Driver1::motor2_direction_toggle(void){
     printf("Motor direction on pin %d toggled to state %d\n", DIR2, DIR2_STATE);
 }
 
+void Driver1::motor1_set_direction(bool reverse){
+    if (DIR1_STATE == reverse) return;
+
+    DIR1_STATE = reverse;
+    gpio_set_level(DIR1, DIR1_STATE);
+    printf("Motor 1 direction set to %s\n", reverse ? "reverse" : "forward");
+}
+
+void Driver1::motor2_set_direction(bool reverse){
+    if (DIR2_STATE == reverse) return;
+
+    DIR2_STATE = reverse;
+    gpio_set_level(DIR2, DIR2_STATE);
+    printf("Motor 2 direction set to %s\n", reverse ? "reverse" : "forward");
+}
+
 void Driver1::motor1_set_speed(float speed_ms){
     float applied_speed = speed_ms;
     if (applied_speed < 0.0f) applied_speed = 0.0f;
@@ -107,6 +125,14 @@ void Driver1::motor1_set_speed(float speed_ms){
     printf("Velocidad del motor 1 establecida a %.2f m/s (Duty Cycle: %d)\n", applied_speed, pwm_value);
 }
 
+void Driver1::motor1_set_speed_signed(float speed_ms){
+    bool reverse = speed_ms < 0.0f;
+    float magnitude = reverse ? -speed_ms : speed_ms;
+
+    motor1_set_direction(reverse);
+    motor1_set_speed(magnitude);
+}
+
 void Driver1::motor2_set_speed(float speed_ms){
     float applied_speed = speed_ms;
     if (applied_speed < 0.0f) applied_speed = 0.0f;
@@ -121,6 +147,14 @@ void Driver1::motor2_set_speed(float speed_ms){
     motor2_speed = applied_speed;
 
     printf("Velocidad del motor 2 establecida a %.2f m/s (Duty Cycle: %d)\n", applied_speed, pwm_value);
+}
+
+void Driver1::motor2_set_speed_signed(float speed_ms){
+    bool reverse = speed_ms < 0.0f;
+    float magnitude = reverse ? -speed_ms : speed_ms;
+
+    motor2_set_direction(reverse);
+    motor2_set_speed(magnitude);
 }
 
 void Driver1::motor1_linear_increase(float ts_speed, int time_ms){
