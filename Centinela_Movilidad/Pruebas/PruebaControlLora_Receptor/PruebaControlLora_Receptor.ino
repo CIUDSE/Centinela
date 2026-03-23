@@ -23,6 +23,8 @@ telemetryControl_t telemetryControl;
 
 void setup() 
 {
+  Serial.begin(115200);
+
   inicializarLora();  //Función para inicializar LoRa.
   Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ); 
 }
@@ -32,6 +34,10 @@ void loop()
   if(recibirDatos() == true)
   {
     compartirDatosI2C();
+    Serial.print("X: ");
+  Serial.print(telemetryControl.x );
+  Serial.print(" | Y: ");
+  Serial.println(telemetryControl.y);
   }
   
   delay(10); 

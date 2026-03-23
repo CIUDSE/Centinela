@@ -30,6 +30,10 @@ Archivo header con la declaración de pines y configuración inicial para prueba
   
   //Banda LORA
   #define BAND 915E6
+//Joystick pins
+  #define JOYSTICK_X 13  // Analog pin for X-axis
+  #define JOYSTICK_Y 4  // Analog pin for Y-axis
+  #define JOYSTICK_SW 34 // Digital pin for button
 
 #endif
 

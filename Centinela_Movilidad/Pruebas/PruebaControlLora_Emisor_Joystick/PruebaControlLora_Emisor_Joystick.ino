@@ -24,14 +24,25 @@ telemetryControl_t telemetryControl;
 void setup() 
 {
   inicializarLora();  //Función para inicializar LoRa.
-  
+   Serial.begin(115200);
+
+  // Configure joystick pins
+  pinMode(JOYSTICK_X, INPUT);
+  pinMode(JOYSTICK_Y, INPUT);
+  pinMode(JOYSTICK_SW, INPUT_PULLUP); // Internal pull-up resistor for button
 }
 
 void loop() 
 {
   //Leer datos de JoyStick
-
-  //enviarDatos();
+  telemetryControl.x = analogRead(JOYSTICK_X); // Range: 0-4095
+  telemetryControl.y = analogRead(JOYSTICK_Y); // Range: 0-4095
+  telemetryControl.brake = digitalRead(JOYSTICK_SW) == LOW;
   
+  enviarDatos();
+  Serial.print("X: ");
+  Serial.print(telemetryControl.x );
+  Serial.print(" | Y: ");
+  Serial.println(telemetryControl.y);
   delay(10); 
 }
