@@ -5,7 +5,7 @@ import sys
 
 app = Flask(__name__)
 
-IP_RASPBERRY = "192.168.1.50"
+IP_RASPBERRY = "192.168.1.50" # Se utilizará RSTP
 PUERTO_LUCES = 5006
 
 # Crear el socket UDP para enviar datos por la red
