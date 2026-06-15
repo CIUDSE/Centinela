@@ -7,3 +7,7 @@ python3 app.py
 Comandos actuales para activar programa (EN MODO REAL - CON RASPBERRY PI):
 python3 tareas/heist_mission/apagador_de_luces/apagador_luces.py
 python3 app.py [ip de raspberry]
+
+La version de python a utilizar es la version 3.12.3
+
+Hace falta agregar requirements.txt para el entorno virtual
