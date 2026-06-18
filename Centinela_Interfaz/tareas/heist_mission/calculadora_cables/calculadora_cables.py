@@ -74,7 +74,7 @@ class CalculadoraCables(Analizar_Cables):
         >>> calculadora = CalculadoraCables()'
         >>> cables = ["azul", "rojo", "amarillo"]
         >>> calculadora.analizar_panel(cables)
-        {"cable_a_cortar": 2, "color_cable_a_cortar": "rojo"}
+        {2, "rojo"}
         """
         #Aqui se tiene que agregar el analisis que se tiene de los cables
         self.cantidad_cables:int = len(cables)
