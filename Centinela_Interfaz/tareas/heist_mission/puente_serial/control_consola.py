@@ -1,7 +1,7 @@
 # CORRE EN LA ESTACIÓN TERRENA
 import socket
 import sys
-import threading
+import threading # Tener cuidado con threading ya que se ejecutara la tarea en el segundo hilo
 import time
 
 def escuchar_rover(sock): # Función en segundo plano para recibir y mostrar lo que envía el Rover
@@ -27,7 +27,7 @@ def iniciar_control_base():
     print("Comandos de Linux:")
     
     # Hilo receptor para mostrar lo que el Rover envía por el cable XLR3 (respuestas, prompts, etc.)
-    hilo_receptor = threading.Thread(target=escuchar_rover, args=(sock,), daemon=True)
+    hilo_receptor = threading.Thread(target=escuchar_rover, args=(sock,), daemon=True) # Deamon true, para que dependa del hilo principal
     hilo_receptor.start()
     
     # Forzar un envío inicial para despertar al Rover y vincular la IP del puente con la consola
