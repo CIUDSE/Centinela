@@ -2,6 +2,11 @@
 from flask import Flask, render_template, request, jsonify
 import socket
 import sys
+import os
+from pathlib import Path
+
+# Utilizar sys.append() para agregar el directorio actual al path de importación -> Esto es útil para importar módulos locales sin problemas
+
 
 app = Flask(__name__)
 

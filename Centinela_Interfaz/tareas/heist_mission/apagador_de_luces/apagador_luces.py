@@ -1,5 +1,6 @@
 # CORRE EN EL ROVER (CONTROL DE LUCES)
 
+
 import socket
 import sys
 # Detección de entorno: Si no se encuentra la librería RPi.GPIO, se asume que es una simulación en laptop
