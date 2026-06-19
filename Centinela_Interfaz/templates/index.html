@@ -1,4 +1,4 @@
-<!doctype html>
+<!-- <!doctype html>
 <html lang="es">
   <head>
     <link
@@ -129,6 +129,197 @@
         </div>
       </div>
     </div>
+
+    <script>
+      let stream1 = null;
+      let stream2 = null;
+
+      async function encenderCamara(tipo) {
+        try {
+          const constraints = { video: { facingMode: tipo } };
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+          if (tipo === "user") {
+            stream1 = stream;
+            document.getElementById("cam1").srcObject = stream;
+          } else {
+            stream2 = stream;
+            document.getElementById("cam2").srcObject = stream;
+          }
+        } catch (err) {
+          alert("No se pudo acceder a la cámara: " + err.message);
+        }
+      }
+
+      function detenerCamara(num) {
+        const stream = num === 1 ? stream1 : stream2;
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          document.getElementById("cam" + num).srcObject = null;
+        }
+      }
+
+      // Envía comandos normales a la API de luces
+      async function enviarComandoLuces(accion) {
+        try {
+          const response = await fetch("/api/luces", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ comando: accion }),
+          });
+
+          const resultado = await response.json();
+          if (!response.ok) {
+            alert(resultado.mensaje); // Te avisará en pantalla si está bloqueado
+          } else {
+            console.log(resultado.mensaje);
+          }
+        } catch (error) {
+          console.error("Error de red:", error);
+        }
+      }
+
+      // NUEVA FUNCIÓN: Envía acciones a la API de emergencia
+      async function enviarEmergencia(estado) {
+        try {
+          const response = await fetch("/api/emergencia", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accion: estado }),
+          });
+
+          const resultado = await response.json();
+          console.log("Emergencia API:", resultado.mensaje);
+          alert(resultado.mensaje);
+        } catch (error) {
+          console.error("Error de red en emergencia:", error);
+        }
+      }
+    </script>
+  </body>
+</html> -->
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estación Terrena - Rover</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="topbar__logo">⬡ CIRC ROVER</span>
+      <span class="topbar__status">
+        <span class="dot dot--green"></span> Sistema activo
+      </span>
+    </header>
+
+    <main class="dashboard">
+      <!-- PANEL 1 — Estado del Rover -->
+      <section class="panel panel--estado">
+        <h2 class="panel__title">Estado del Rover</h2>
+        <div class="estado-grid">
+          <div class="estado-item">
+            <span class="estado-item__label">Salud</span>
+            <canvas class="estado-item__canvas"></canvas>
+          </div>
+          <div class="estado-item">
+            <span class="estado-item__label">Ubicación</span>
+            <canvas class="estado-item__canvas"></canvas>
+          </div>
+          <div class="estado-item">
+            <span class="estado-item__label">Sistemas a bordo</span>
+            <canvas class="estado-item__canvas"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 2 — Cámaras -->
+      <section class="panel panel--camaras">
+        <h2 class="panel__title">Cámaras</h2>
+        <div class="camaras-grid">
+          <div class="camara">
+            <h3 class="camara__label">Cámara 1</h3>
+            <video id="cam1" autoplay playsinline></video>
+            <div class="camara__btns">
+              <button class="btn btn--on" onclick="encenderCamara('user')">
+                Encender
+              </button>
+              <button class="btn btn--off" onclick="detenerCamara(1)">
+                Detener
+              </button>
+            </div>
+          </div>
+          <div class="camara">
+            <h3 class="camara__label">Cámara 2</h3>
+            <video id="cam2" autoplay playsinline></video>
+            <div class="camara__btns">
+              <button
+                class="btn btn--on"
+                onclick="encenderCamara('environment')"
+              >
+                Encender
+              </button>
+              <button class="btn btn--off" onclick="detenerCamara(2)">
+                Detener
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 3 — Controles -->
+      <section class="panel panel--controles">
+        <h2 class="panel__title">Controles</h2>
+
+        <div class="controles-modos">
+          <button class="btn btn--modo">Brazo</button>
+          <button class="btn btn--modo">Automatización</button>
+          <button class="btn btn--modo">Manual</button>
+        </div>
+
+        <div class="emergencia">
+          <h4 class="emergencia__title">SISTEMA DE SEGURIDAD</h4>
+          <button class="btn btn--estop" onclick="enviarEmergencia('ACTIVAR')">
+            ⛔ PARADA DE EMERGENCIA (E-STOP)
+          </button>
+          <button
+            class="btn btn--reset"
+            onclick="enviarEmergencia('DESACTIVAR')"
+          >
+            Reactivar Rover (Reset)
+          </button>
+        </div>
+
+        <div class="luces">
+          <h4 class="luces__title">Iluminación del Rover</h4>
+          <div class="luces__btns">
+            <button
+              class="btn btn--luces-on"
+              onclick="enviarComandoLuces('ENCENDER')"
+            >
+              ☀ Encender
+            </button>
+            <button
+              class="btn btn--luces-off"
+              onclick="enviarComandoLuces('APAGAR')"
+            >
+              ✕ Apagar
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 4 — GNSS -->
+      <section class="panel panel--gnss">
+        <h2 class="panel__title">Coordenadas GNSS</h2>
+        <canvas class="gnss__mapa"></canvas>
+      </section>
+    </main>
 
     <script>
       let stream1 = null;

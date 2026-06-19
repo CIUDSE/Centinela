@@ -2,12 +2,10 @@ Estando en ~/Centinela/Centinela_Interfaz con 2 terminales abiertas:
 
 Comandos actuales para activar programa (EN MODO SIMULACION):
 python3 tareas/heist_mission/apagador_de_luces/apagador_luces.py
-python3 app.py
+python3 app.py 127.0.0.1
 
 Comandos actuales para activar programa (EN MODO REAL - CON RASPBERRY PI):
 python3 tareas/heist_mission/apagador_de_luces/apagador_luces.py
 python3 app.py [ip de raspberry]
 
 La version de python a utilizar es la version 3.12.6
-
-
