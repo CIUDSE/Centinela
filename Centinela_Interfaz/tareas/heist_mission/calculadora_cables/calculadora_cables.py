@@ -97,47 +97,47 @@ class CalculadoraCables(Analizar_Cables):
         # REGLAS PARA 3 CABLES (Revisar esto porque no tiene mucho sentido)
         if self.cantidad_cables == 3:
             if "rojo" not in cables:
-                self.cable_a_cortar = {2, cables[1]}
+                self.cable_a_cortar = {2: cables[1]}
             elif cables[-1] == "blanco":
-                self.cable_a_cortar = {3, cables[2]}
+                self.cable_a_cortar = {3: cables[2]}
             elif cables.count("azul") > 1:
                 self.cable_a_cortar = {
-                    len(cables) - cables[::-1].index("azul"), "azul"}
+                    len(cables) - cables[::-1].index("azul"): "azul"}
             else:
-                self.cable_a_cortar = {3, cables[2]}
+                self.cable_a_cortar = {3: cables[2]}
 
         elif self.cantidad_cables == 4:
             if cables.count("rojo") > 1:
                 self.cable_a_cortar = {
-                    len(cables) - cables[::-1].index("rojo"), "rojo"}
+                    len(cables) - cables[::-1].index("rojo"): "rojo"}
             elif cables[-1] == "amarillo" and "rojo" not in cables:
-                self.cable_a_cortar = {1, cables[0]}
+                self.cable_a_cortar = {1: cables[0]}
             elif cables.count("azul") == 1:
-                self.cable_a_cortar = {1, cables[0]}
+                self.cable_a_cortar = {1: cables[0]}
             elif cables.count("amarillo") > 1:
-                self.cable_a_cortar = {4, cables[3]}
+                self.cable_a_cortar = {4: cables[3]}
             else:
-                self.cable_a_cortar = {2, cables[1]}
+                self.cable_a_cortar = {2: cables[1]}
 
         elif self.cantidad_cables == 5:
             if cables[-1] == "negro":
-                self.cable_a_cortar = {4, cables[3]}
+                self.cable_a_cortar = {4: cables[3]}
             elif cables.count("rojo") == 1 and cables.count("amarillo") > 1:
-                self.cable_a_cortar = {1, cables[0]}
+                self.cable_a_cortar = {1: cables[0]}
             elif "negro" not in cables:
-                self.cable_a_cortar = {2, cables[1]}
+                self.cable_a_cortar = {2: cables[1]}
             else:
-                self.cable_a_cortar = {5, cables[4]}
+                self.cable_a_cortar = {5: cables[4]}
 
         elif self.cantidad_cables == 6:
             if "amarillo" not in cables:
-                self.cable_a_cortar = {3, cables[2]}
+                self.cable_a_cortar = {3: cables[2]}
             elif cables.count("amarillo") == 1 and cables.count("blanco") > 1:
-                self.cable_a_cortar = {4, cables[3]}
+                self.cable_a_cortar = {4: cables[3]}
             elif "rojo" not in cables:
-                self.cable_a_cortar = {6, cables[5]}
+                self.cable_a_cortar = {6: cables[5]}
             else:
-                self.cable_a_cortar = {2, cables[1]}
+                self.cable_a_cortar = {2: cables[1]}
             ...
 
     @_exceptions("Error al procesar la entrada")

@@ -1,22 +1,26 @@
 # CORRE EN LA LAPTOP (ESTACIÓN TERRENA)
-from flask import Flask, render_template, request, jsonify
 import socket
 import sys
 import os
 from pathlib import Path
+from flask import Flask, render_template, request, jsonify
+
+from tareas.heist_mission.calculadora_cables import CalculadoraCables
+
 
 # Utilizar sys.append() para agregar el directorio actual al path de importación -> Esto es útil para importar módulos locales sin problemas
 
-
 app = Flask(__name__)
 
-IP_RASPBERRY = "192.168.1.50" # Se utilizará RSTP
+IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
 PUERTO_LUCES = 5006
 
 # Crear el socket UDP para enviar datos por la red
 sock_enviador = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 EMERGENCIA_ACTIVA = False
+
+calculadora = CalculadoraCables()
 
 
 @app.route('/')
@@ -73,6 +77,35 @@ def enviar_al_rover():
             return jsonify({"status": "error", "mensaje": str(e)}), 500
 
     return jsonify({"status": "error", "mensaje": "Comando inválido"}), 400
+
+
+@app.route('/api/cables', methods=['POST'])
+def analizar_cables():
+    data = request.get_json()
+    entrada = data.get('cables', '')
+
+    try:
+        lista_cables = calculadora.procesar_entrada(entrada)
+
+        if not lista_cables:
+            return jsonify({"status": "error", "mensaje": "Entrada vacía. Ingresa los colores separados por coma."}), 400
+
+        calculadora.analizar_panel(lista_cables)
+
+        numero = list(calculadora.cable_a_cortar.keys())[0]
+        color = list(calculadora.cable_a_cortar.values())[0]
+
+        return jsonify({
+            "status": "success",
+            "cable_numero": numero,
+            "cable_color": color,
+            "cables_analizados": lista_cables
+        }), 200
+
+    except ValueError as e:
+        return jsonify({"status": "error", "mensaje": str(e)}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "mensaje": f"Error inesperado: {e}"}), 500
 
 
 if __name__ == "__main__":

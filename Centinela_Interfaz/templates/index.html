@@ -118,6 +118,38 @@
         <h2 class="panel__title">Coordenadas GNSS</h2>
         <canvas class="gnss__mapa"></canvas>
       </section>
+
+      <!-- PANEL 5 — CABLES -->
+      <section class="panel panel--cables">
+        <h2 class="panel__title">🔌 Heist Mission — Panel de Cables</h2>
+        <p class="cables__instruccion">
+          Ingresa los cables de izquierda a derecha, separados por coma.<br />
+          <small>Válidos: rojo, blanco, azul, amarillo, negro</small>
+        </p>
+        <div class="cables__input-group">
+          <input
+            type="text"
+            id="cables-input"
+            class="cables__input"
+            placeholder="Ej: azul, rojo, amarillo"
+          />
+          <button class="btn btn--analizar" onclick="analizarCables()">
+            Analizar
+          </button>
+        </div>
+        <div
+          id="cables-resultado"
+          class="cables__resultado cables__resultado--oculto"
+        >
+          <span class="cables__resultado-label">✂️ Cortar cable</span>
+          <span id="cables-numero" class="cables__numero"></span>
+          <span id="cables-color" class="cables__color-badge"></span>
+        </div>
+        <div
+          id="cables-error"
+          class="cables__error cables__resultado--oculto"
+        ></div>
+      </section>
     </main>
 
     <script>
@@ -183,6 +215,45 @@
           alert(resultado.mensaje);
         } catch (error) {
           console.error("Error de red en emergencia:", error);
+        }
+      }
+
+      async function analizarCables() {
+        const entrada = document.getElementById("cables-input").value.trim();
+        const divResultado = document.getElementById("cables-resultado");
+        const divError = document.getElementById("cables-error");
+
+        divResultado.classList.add("cables__resultado--oculto");
+        divError.classList.add("cables__resultado--oculto");
+
+        if (!entrada) {
+          divError.textContent = "⚠️ Ingresa los colores antes de analizar.";
+          divError.classList.remove("cables__resultado--oculto");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/cables", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cables: entrada }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById("cables-numero").textContent =
+              `#${data.cable_numero}`;
+            const badge = document.getElementById("cables-color");
+            badge.textContent = data.cable_color;
+            divResultado.classList.remove("cables__resultado--oculto");
+          } else {
+            divError.textContent = `❌ ${data.mensaje}`;
+            divError.classList.remove("cables__resultado--oculto");
+          }
+        } catch (err) {
+          divError.textContent = `❌ Error de red: ${err.message}`;
+          divError.classList.remove("cables__resultado--oculto");
         }
       }
     </script>
