@@ -5,7 +5,8 @@ import sys
 import os
 from pathlib import Path
 
-# Utilizar sys.append() para agregar el directorio actual al path de importación -> Esto es útil para importar módulos locales sin problemas
+# Utilizar el paquete completo para importar la calculadora de cables desde el directorio raíz del proyecto
+from tareas.heist_mission.calculadora_cables import CalculadoraCables
 
 
 app = Flask(__name__)
