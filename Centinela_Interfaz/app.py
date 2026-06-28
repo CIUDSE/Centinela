@@ -7,9 +7,6 @@ from flask import Flask, render_template, request, jsonify
 
 from tareas.heist_mission.calculadora_cables import CalculadoraCables
 
-
-# Utilizar sys.append() para agregar el directorio actual al path de importación -> Esto es útil para importar módulos locales sin problemas
-
 app = Flask(__name__)
 
 IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
