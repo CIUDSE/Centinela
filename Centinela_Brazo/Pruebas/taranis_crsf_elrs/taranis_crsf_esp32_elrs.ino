@@ -2,9 +2,6 @@
 
 // Utiliza la libreria CRSF for Arduino de Cassandra Robinson. Descargarla antes de ejecutar este script.
 
-// TO-DO LIST:
-//      -> Corregir el orden de los canales, se encuentra desordenado.
-
 #include <CRSFforArduino.hpp>
 
 CRSFforArduino *crsf = nullptr;
@@ -42,5 +39,7 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
     Serial.print(" CH2:"); Serial.print(crsf->rcToUs(rcData->value[1]));
     Serial.print(" CH3:"); Serial.print(crsf->rcToUs(rcData->value[2]));
     Serial.print(" CH4:"); Serial.println(crsf->rcToUs(rcData->value[3]));
+    Serial.print(" CH5:"); Serial.println(crsf->rcToUs(rcData->value[4]));
+    Serial.print(" CH6:"); Serial.println(crsf->rcToUs(rcData->value[5]));
   }
 }
