@@ -94,7 +94,6 @@ class CalculadoraCables(Analizar_Cables):
             raise ValueError(
                 f"Colores no válidos en la lista: {cables}. El reglamento solo permite: {', '.join(self.COLORES_VALIDOS)}")
 
-        # REGLAS PARA 3 CABLES (Revisar esto porque no tiene mucho sentido)
         if self.cantidad_cables == 3:
             if "rojo" not in cables:
                 self.cable_a_cortar = {2: cables[1]}
@@ -138,7 +137,6 @@ class CalculadoraCables(Analizar_Cables):
                 self.cable_a_cortar = {6: cables[5]}
             else:
                 self.cable_a_cortar = {2: cables[1]}
-            ...
 
     @_exceptions("Error al procesar la entrada")
     def procesar_entrada(self, entrada: str) -> List[str]:
