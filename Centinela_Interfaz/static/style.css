@@ -44,6 +44,23 @@ h4 {
 }
 
 /* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+
+.oculto {
+  display: none !important;
+}
+
+.error-box {
+  padding: 0.6rem 1rem;
+  background: #3d0000;
+  border-left: 4px solid #e74c3c;
+  border-radius: 6px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+/* ─────────────────────────────────────────
    TOPBAR
 ───────────────────────────────────────── */
 .topbar {
@@ -81,6 +98,10 @@ h4 {
   background: var(--green);
   box-shadow: 0 0 6px var(--green);
 }
+.dot--red {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
 
 /* ─────────────────────────────────────────
    DASHBOARD — 4-section flexbox grid
@@ -99,7 +120,7 @@ h4 {
 /* Each panel takes exactly half the row (minus gap) */
 .panel {
   flex: 1 1 calc(50% - var(--gap) / 2);
-  min-width: 300px; /* collapse to single column below this */
+  min-width: 250px; /* collapse to single column below this */
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -120,10 +141,10 @@ h4 {
 }
 
 .panel--estado {
-  flex-basis: calc(40% - var(--gap) / 2);
+  flex-basis: calc(25% - var(--gap) / 2);
 }
 .panel--camaras {
-  flex-basis: calc(60% - var(--gap) / 2);
+  flex-basis: calc(75% - var(--gap) / 2);
 }
 
 /* ─────────────────────────────────────────
@@ -316,10 +337,6 @@ video {
   border-left: 4px solid #4a90d9;
 }
 
-.cables__resultado--oculto {
-  display: none;
-}
-
 .cables__numero {
   font-size: 1.5rem;
   font-weight: bold;
@@ -333,15 +350,6 @@ video {
   font-size: 0.9rem;
   text-transform: capitalize;
   border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.cables__error {
-  padding: 0.6rem 1rem;
-  background: #3d0000;
-  border-left: 4px solid #e74c3c;
-  border-radius: 6px;
-  color: #ff6b6b;
-  font-size: 0.9rem;
 }
 
 /* ─────────────────────────────────────────

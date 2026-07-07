@@ -8,12 +8,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Estación Terrena - Rover</title>
+    <script src="{{ url_for('static', filename='utils.js') }}"></script>
+    <!--^^^ SIEMPRE PONER ESTE SCRIPT PRIMERO POR QUE LOS OTROS DEPENDEN DE EL ^^^ -->
+    <script src="{{ url_for('static', filename='whep.js') }}"></script>
+    <script src="{{ url_for('static', filename='tareas.js') }}"></script>
   </head>
   <body>
     <header class="topbar">
       <span class="topbar__logo">⬡ CIRC ROVER</span>
       <span class="topbar__status">
-        <span class="dot dot--green"></span> Sistema activo
+        <span id="status-dot" class="dot dot--green"></span>
+        <span id="status-texto">Sistema activo</span>
       </span>
     </header>
 
@@ -43,43 +48,46 @@
         <div class="camaras-grid">
           <div class="camara">
             <h3 class="camara__label">Cámara 1</h3>
-            <video id="cam1" autoplay playsinline></video>
+            <video id="cam1" autoplay playsinline muted></video>
             <div class="camara__btns">
-              <button class="btn btn--on" onclick="encenderCamara('user')">
+              <button
+                class="btn btn--on"
+                onclick="
+                  conectarCamara('cam1', 'http://192.168.50.1:8889/cam1/whep')
+                "
+              >
                 Encender
               </button>
-              <button class="btn btn--off" onclick="detenerCamara(1)">
+              <button class="btn btn--off" onclick="desconectarCamara('cam1')">
                 Detener
               </button>
             </div>
           </div>
           <div class="camara">
             <h3 class="camara__label">Cámara 2</h3>
-            <video id="cam2" autoplay playsinline></video>
+            <video id="cam2" autoplay playsinline muted></video>
             <div class="camara__btns">
               <button
                 class="btn btn--on"
-                onclick="encenderCamara('environment')"
+                onclick="
+                  conectarCamara('cam2', 'http://192.168.50.1:8889/cam2/whep')
+                "
               >
                 Encender
               </button>
-              <button class="btn btn--off" onclick="detenerCamara(2)">
+              <button class="btn btn--off" onclick="desconectarCamara('cam2')">
                 Detener
               </button>
             </div>
           </div>
         </div>
+
+        <div id="camaras-error" class="error-box oculto"></div>
       </section>
 
       <!-- PANEL 3 — Controles -->
       <section class="panel panel--controles">
         <h2 class="panel__title">Controles</h2>
-
-        <div class="controles-modos">
-          <button class="btn btn--modo">Brazo</button>
-          <button class="btn btn--modo">Automatización</button>
-          <button class="btn btn--modo">Manual</button>
-        </div>
 
         <div class="emergencia">
           <h4 class="emergencia__title">SISTEMA DE SEGURIDAD</h4>
@@ -111,12 +119,45 @@
             </button>
           </div>
         </div>
-        <div class="solenoide-status" style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center;">
-          <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Actuador Solenoide</h4>
-          <div id="indicador-solenoide" class="btn" style="background-color: #333; color: #888; width: 80%; margin: 0 auto; pointer-events: none; transition: all 0.1s ease; border: 1px solid #444;">
+        <div
+          class="solenoide-status"
+          style="
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            text-align: center;
+          "
+        >
+          <h4
+            style="
+              margin: 0 0 10px 0;
+              font-size: 0.9rem;
+              color: #aaa;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            "
+          >
+            Actuador Solenoide
+          </h4>
+          <div
+            id="indicador-solenoide"
+            class="btn"
+            style="
+              background-color: #333;
+              color: #888;
+              width: 80%;
+              margin: 0 auto;
+              pointer-events: none;
+              transition: all 0.1s ease;
+              border: 1px solid #444;
+            "
+          >
             ⬡ SOLENOIDE APAGADO
           </div>
-          <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: #666;">Pisa [Barra Espaciadora] fuera del cuadro de texto para dar un pulso seguro</p>
+          <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: #666">
+            Pisa [Barra Espaciadora] fuera del cuadro de texto para dar un pulso
+            seguro
+          </p>
         </div>
       </section>
 
@@ -144,167 +185,66 @@
             Analizar
           </button>
         </div>
-        <div
-          id="cables-resultado"
-          class="cables__resultado cables__resultado--oculto"
-        >
+        <div id="cables-resultado" class="cables__resultado oculto">
           <span class="cables__resultado-label">✂️ Cortar cable</span>
           <span id="cables-numero" class="cables__numero"></span>
           <span id="cables-color" class="cables__color-badge"></span>
         </div>
-        <div
-          id="cables-error"
-          class="cables__error cables__resultado--oculto"
-        ></div>
+        <div id="cables-error" class="error-box oculto"></div>
       </section>
     </main>
 
     <script>
-      let stream1 = null;
-      let stream2 = null;
+      let teclaPresionada = false;
+      const indicadorSolenoide = document.getElementById("indicador-solenoide");
+      window.addEventListener("keydown", (event) => {
+        const tagActivo = document.activeElement.tagName;
+        if (tagActivo === "INPUT" || tagActivo === "TEXTAREA") return;
 
-      async function encenderCamara(tipo) {
-        try {
-          const constraints = { video: { facingMode: tipo } };
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-          if (tipo === "user") {
-            stream1 = stream;
-            document.getElementById("cam1").srcObject = stream;
-          } else {
-            stream2 = stream;
-            document.getElementById("cam2").srcObject = stream;
-          }
-        } catch (err) {
-          alert("No se pudo acceder a la cámara: " + err.message);
-        }
-      }
-
-      function detenerCamara(num) {
-        const stream = num === 1 ? stream1 : stream2;
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          document.getElementById("cam" + num).srcObject = null;
-        }
-      }
-
-      // Envía comandos normales a la API de luces
-      async function enviarComandoLuces(accion) {
-        try {
-          const response = await fetch("/api/luces", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ comando: accion }),
-          });
-
-          const resultado = await response.json();
-          if (!response.ok) {
-            alert(resultado.mensaje); // Te avisará en pantalla si está bloqueado
-          } else {
-            console.log(resultado.mensaje);
-          }
-        } catch (error) {
-          console.error("Error de red:", error);
-        }
-      }
-
-      // NUEVA FUNCIÓN: Envía acciones a la API de emergencia
-      async function enviarEmergencia(estado) {
-        try {
-          const response = await fetch("/api/emergencia", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ accion: estado }),
-          });
-
-          const resultado = await response.json();
-          console.log("Emergencia API:", resultado.mensaje);
-          alert(resultado.mensaje);
-        } catch (error) {
-          console.error("Error de red en emergencia:", error);
-        }
-      }
-
-      async function analizarCables() {
-        const entrada = document.getElementById("cables-input").value.trim();
-        const divResultado = document.getElementById("cables-resultado");
-        const divError = document.getElementById("cables-error");
-
-        divResultado.classList.add("cables__resultado--oculto");
-        divError.classList.add("cables__resultado--oculto");
-
-        if (!entrada) {
-          divError.textContent = "⚠️ Ingresa los colores antes de analizar.";
-          divError.classList.remove("cables__resultado--oculto");
-          return;
-        }
-
-        try {
-          const response = await fetch("/api/cables", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cables: entrada }),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            document.getElementById("cables-numero").textContent =
-              `#${data.cable_numero}`;
-            const badge = document.getElementById("cables-color");
-            badge.textContent = data.cable_color;
-            divResultado.classList.remove("cables__resultado--oculto");
-          } else {
-            divError.textContent = `❌ ${data.mensaje}`;
-            divError.classList.remove("cables__resultado--oculto");
-          }
-        } catch (err) {
-          divError.textContent = `❌ Error de red: ${err.message}`;
-          divError.classList.remove("cables__resultado--oculto");
-        }
-      }
-    let teclaPresionada = false;
-    const indicadorSolenoide = document.getElementById('indicador-solenoide');
-    window.addEventListener('keydown', (event) => {
-      const tagActivo = document.activeElement.tagName;
-      if (tagActivo === 'INPUT' || tagActivo === 'TEXTAREA') return;
-
-      if (event.code === 'Space' && !teclaPresionada) {
+        if (event.code === "Space" && !teclaPresionada) {
           teclaPresionada = true;
           event.preventDefault();
           indicadorSolenoide.style.backgroundColor = "var(--red, #d9534f)";
           indicadorSolenoide.style.color = "#fff";
           indicadorSolenoide.style.borderColor = "#ff6b6b";
-          indicadorSolenoide.style.boxShadow = "0 0 15px rgba(217, 83, 79, 0.6)";
+          indicadorSolenoide.style.boxShadow =
+            "0 0 15px rgba(217, 83, 79, 0.6)";
           indicadorSolenoide.textContent = "PULSO ENVIADO";
-          fetch('/api/solenoide', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ comando: 'PULSO_RAPIDO' })
+          fetch("/api/solenoide", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ comando: "PULSO_RAPIDO" }),
           });
           console.log("Barra espaciadora detectada. Enviando pulso");
           setTimeout(() => {
-              if (teclaPresionada) {
-                  indicadorSolenoide.style.backgroundColor = "#224466";
-                  indicadorSolenoide.style.color = "#00b4d8";
-                  indicadorSolenoide.style.borderColor = "#00b4d8";
-                  indicadorSolenoide.style.boxShadow = "none";
-                  indicadorSolenoide.textContent = "⬡ PROCESADO - ESPERANDO LIBERACIÓN";
+            if (teclaPresionada) {
+              indicadorSolenoide.style.backgroundColor = "#224466";
+              indicadorSolenoide.style.color = "#00b4d8";
+              indicadorSolenoide.style.borderColor = "#00b4d8";
+              indicadorSolenoide.style.boxShadow = "none";
+              indicadorSolenoide.textContent =
+                "⬡ PROCESADO - ESPERANDO LIBERACIÓN";
             }
           }, 300); // Restablece después de 300 ms
-      }  
-    });
-    window.addEventListener('keyup', (event) => {
-        if (event.code === 'Space') {
-            teclaPresionada = false;
-
-            indicadorSolenoide.style.backgroundColor = "#333";
-            indicadorSolenoide.style.color = "#888";
-            indicadorSolenoide.style.borderColor = "#444";
-            indicadorSolenoide.style.boxShadow = "none";
-            indicadorSolenoide.textContent = "⬡ SOLENOIDE APAGADO";
         }
-    });
+      });
+      window.addEventListener("keyup", (event) => {
+        if (event.code === "Space") {
+          teclaPresionada = false;
+
+          indicadorSolenoide.style.backgroundColor = "#333";
+          indicadorSolenoide.style.color = "#888";
+          indicadorSolenoide.style.borderColor = "#444";
+          indicadorSolenoide.style.boxShadow = "none";
+          indicadorSolenoide.textContent = "⬡ SOLENOIDE APAGADO";
+        }
+      });
+
+      // Conectar automáticamente las cámaras al cargar la página
+      window.addEventListener("DOMContentLoaded", () => {
+        conectarCamara("cam1", "http://192.168.50.1:8889/cam1/whep");
+        conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
+      });
     </script>
   </body>
 </html>
