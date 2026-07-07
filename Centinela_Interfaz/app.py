@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
 PUERTO_LUCES = 5006
+PUERTO_SOLENOIDE = 5007
 
 # Crear el socket UDP para enviar datos por la red
 sock_enviador = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -104,6 +105,28 @@ def analizar_cables():
     except Exception as e:
         return jsonify({"status": "error", "mensaje": f"Error inesperado: {e}"}), 500
 
+@app.route('/api/solenoide', methods=['POST'])
+def controlar_solenoide():
+    global EMERGENCIA_ACTIVA
+
+    # Escudo de protección contra E-STOP
+    if EMERGENCIA_ACTIVA:
+        print("❌ [BLOQUEADO] Intento de activar solenoide rechazado por E-STOP.")
+        return jsonify({"status": "blocked", "mensaje": "⚠️ ACCIÓN RECHAZADA: El Rover está en Parada de Emergencia."}), 403
+
+    data = request.get_json()
+    comando = data.get('comando', '')
+
+    if comando == 'PULSO_RAPIDO':
+        try:
+            # Reutiliza el sock_enviador para lanzar el paquete UDP al puerto 5007 de la Raspi
+            sock_enviador.sendto(b"PULSO_RAPIDO", (IP_RASPBERRY, PUERTO_SOLENOIDE))
+            print(f"[WEB] ¡PULSO_RAPIDO enviado al Solenoide! ({IP_RASPBERRY}:{PUERTO_SOLENOIDE})")
+            return jsonify({"status": "success", "mensaje": "Pulso enviado de forma segura"}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "mensaje": f"Error de red UDP: {e}"}), 500
+
+    return jsonify({"status": "error", "mensaje": "Comando de solenoide desconocido"}), 400
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:

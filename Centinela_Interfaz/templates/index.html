@@ -111,6 +111,13 @@
             </button>
           </div>
         </div>
+        <div class="solenoide-status" style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center;">
+          <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Actuador Solenoide</h4>
+          <div id="indicador-solenoide" class="btn" style="background-color: #333; color: #888; width: 80%; margin: 0 auto; pointer-events: none; transition: all 0.1s ease; border: 1px solid #444;">
+            ⬡ SOLENOIDE APAGADO
+          </div>
+          <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: #666;">Pisa [Barra Espaciadora] fuera del cuadro de texto para dar un pulso seguro</p>
+        </div>
       </section>
 
       <!-- PANEL 4 — GNSS -->
@@ -256,6 +263,48 @@
           divError.classList.remove("cables__resultado--oculto");
         }
       }
+    let teclaPresionada = false;
+    const indicadorSolenoide = document.getElementById('indicador-solenoide');
+    window.addEventListener('keydown', (event) => {
+      const tagActivo = document.activeElement.tagName;
+      if (tagActivo === 'INPUT' || tagActivo === 'TEXTAREA') return;
+
+      if (event.code === 'Space' && !teclaPresionada) {
+          teclaPresionada = true;
+          event.preventDefault();
+          indicadorSolenoide.style.backgroundColor = "var(--red, #d9534f)";
+          indicadorSolenoide.style.color = "#fff";
+          indicadorSolenoide.style.borderColor = "#ff6b6b";
+          indicadorSolenoide.style.boxShadow = "0 0 15px rgba(217, 83, 79, 0.6)";
+          indicadorSolenoide.textContent = "PULSO ENVIADO";
+          fetch('/api/solenoide', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ comando: 'PULSO_RAPIDO' })
+          });
+          console.log("Barra espaciadora detectada. Enviando pulso");
+          setTimeout(() => {
+              if (teclaPresionada) {
+                  indicadorSolenoide.style.backgroundColor = "#224466";
+                  indicadorSolenoide.style.color = "#00b4d8";
+                  indicadorSolenoide.style.borderColor = "#00b4d8";
+                  indicadorSolenoide.style.boxShadow = "none";
+                  indicadorSolenoide.textContent = "⬡ PROCESADO - ESPERANDO LIBERACIÓN";
+            }
+          }, 300); // Restablece después de 300 ms
+      }  
+    });
+    window.addEventListener('keyup', (event) => {
+        if (event.code === 'Space') {
+            teclaPresionada = false;
+
+            indicadorSolenoide.style.backgroundColor = "#333";
+            indicadorSolenoide.style.color = "#888";
+            indicadorSolenoide.style.borderColor = "#444";
+            indicadorSolenoide.style.boxShadow = "none";
+            indicadorSolenoide.textContent = "⬡ SOLENOIDE APAGADO";
+        }
+    });
     </script>
   </body>
 </html>
