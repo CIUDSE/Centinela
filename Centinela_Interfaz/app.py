@@ -18,7 +18,7 @@ sock_enviador = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 EMERGENCIA_ACTIVA = False
 
-calculadora = CalculadoraCables()
+calculadora: CalculadoraCables = CalculadoraCables()
 
 
 @app.route('/')

@@ -90,7 +90,6 @@ typedef struct telemetryData
 
   //Datos DS18B20 (Sensores de temperatura)
   float temp[DS18B20_CANTIDAD];
-
 }telemetryData_t;
 
 extern telemetryData_t telemetryData;   //Crear una variable de la estructura
