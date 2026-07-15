@@ -100,4 +100,4 @@ async function enviarEmergencia(estado) {
   } catch (error) {
     console.error("Error de red en emergencia:", error);
   }
-}
+};

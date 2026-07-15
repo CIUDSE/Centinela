@@ -280,14 +280,140 @@ video {
 ───────────────────────────────────────── */
 .gnss__mapa {
   width: 100%;
-  flex: 1;
+  height: 500px;
   min-height: 220px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 8px;
   display: block;
 }
+/* BOTÓN AGREGAR WAYPOINT */
+.btn-waypoint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 10px;
 
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-waypoint:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: #60a5fa;
+  transform: translateY(-1px);
+}
+
+.btn-waypoint:active {
+  transform: translateY(1px);
+}
+
+.btn-waypoint:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+.route-controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.route-controls button{
+    flex:1;
+}
+/* BOTÓN EMPEZAR RUTA */
+.btn-route-start {
+  width: 100%;
+  padding: 12px;
+
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+
+  background: rgba(34,197,94,.15);
+  color: #22c55e;
+
+  cursor: pointer;
+}
+.btn-route-start:hover {
+  background: rgba(34, 197, 94, 0.3);
+  border-color: #4ade80;
+  transform: translateY(-1px);
+}
+
+.btn-route-start:active {
+  transform: translateY(1px);
+}
+
+.btn-route-start:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+}
+/* BOTÓN DETENER RUTA */
+.btn-route-stop {
+  width: 100%;
+  padding: 12px;
+
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+
+  background: rgba(245,158,11,.15);
+  color: #fbbf24;
+
+  cursor: pointer;
+}
+.btn-route-stop:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: #fbbf24;
+  transform: translateY(-1px);
+}
+
+.btn-route-stop:active {
+  transform: translateY(1px);
+}
+
+.btn-route-stop:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+/* BOTÓN LIMPIAR RUTA */
+.btn-route-clear {
+
+  width: 100%;
+  padding: 12px;
+
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+
+  background: rgba(239,68,68,.15);
+  color: #f87171;
+
+  cursor: pointer;
+}
+.btn-route-clear:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #f87171;
+  transform: translateY(-1px);
+}
+
+.btn-route-clear:active {
+  transform: translateY(1px);
+}
+
+.btn-route-clear:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
 /* ─────────────────────────────────────────
    PANEL 5 — CABLES
 ───────────────────────────────────────── */
