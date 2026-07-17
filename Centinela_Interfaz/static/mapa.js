@@ -60,17 +60,25 @@ document.addEventListener("DOMContentLoaded", () => {
 // -----------------------------------------------------------
 
     // EMPEZAR RUTA
-    startButton.addEventListener("click", () => {
+startButton.addEventListener("click", () => {
 
-        recordingRoute = true;
+    recordingRoute = true;
 
+    fetch("/api/mission/start", {
+        method: "POST"
     });
+
+});
     // DETENER RUTA
     stopButton.addEventListener("click", () => {
 
-        recordingRoute = false;
+    recordingRoute = false;
 
+    fetch("/api/mission/stop", {
+        method: "POST"
     });
+
+});
 
     // LIMPIAR RUTA y WAYPOINTS
 clearButton.addEventListener("click", () => {
@@ -119,27 +127,68 @@ clearButton.addEventListener("click", () => {
             `);
 
         waypointMarkers.push(waypointMarker);
+if (recordingRoute) {
 
+    fetch("/api/mission/waypoint", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            latitude: waypoint.lat,
+            longitude: waypoint.lon
+
+        })
+
+    });
+
+}
         waypointCount++;
 
     });
 
     // Simulacion. IMPORTANTE: Reemplazar con datos de GPS!!!!!!!!
-    setInterval(() => {
+setInterval(() => {
 
-        latitude += (Math.random() - 0.5) * 0.002;
-        longitude += (Math.random() - 0.5) * 0.002;
+    fetch("/api/telemetry/latest")
+        .then(response => response.json())
+        .then(data => {
 
-        marker.setLatLng([latitude, longitude]);
+            latitude = data.latitude;
+            longitude = data.longitude;
 
-        if (recordingRoute) {
+            marker.setLatLng([latitude, longitude]);
 
-            route.push([latitude, longitude]);
+            if (recordingRoute) {
 
-            polyline.setLatLngs(route);
+                route.push([latitude, longitude]);
 
-        }
+                polyline.setLatLngs(route);
 
-    }, 250);
+                fetch("/api/mission/point", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        latitude: latitude,
+                        longitude: longitude
+                    })
+                });
+
+            }
+
+        })
+        .catch(error => {
+
+            console.log("Telemetry error:", error);
+
+        });
+
+}, 250);
 
 });

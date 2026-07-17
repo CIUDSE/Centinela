@@ -2,12 +2,60 @@
 import socket
 import sys
 import os
+import serial
+import threading
+
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 
 from tareas.heist_mission.calculadora_cables import CalculadoraCables
+from datetime import datetime
+from openpyxl import Workbook
 
 app = Flask(__name__)
+
+SERIAL_PORT = "COM5"      # Change to your COM port
+BAUDRATE = 115200         # Must match Serial.begin()
+
+latest_telemetry = {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0,
+}
+def serial_reader():
+
+    global latest_telemetry
+
+    try:
+
+        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
+
+        print(f"[SERIAL] Connected to {SERIAL_PORT}")
+
+        while True:
+
+            line = ser.readline().decode("utf-8").strip()
+
+            if not line:
+                continue
+
+            try:
+
+                parts = line.split(",")
+
+                latest_telemetry["latitude"] = float(parts[0])
+                latest_telemetry["longitude"] = float(parts[1])
+                latest_telemetry["altitude"] = float(parts[2])
+
+                print(latest_telemetry)
+
+            except Exception:
+
+                print(f"[SERIAL] Invalid packet: {line}")
+
+    except Exception as e:
+
+        print(f"[SERIAL ERROR] {e}")
 
 IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
 PUERTO_LUCES = 5006
@@ -20,6 +68,8 @@ EMERGENCIA_ACTIVA = False
 
 calculadora: CalculadoraCables = CalculadoraCables()
 
+MISSION_RECORDING = False
+MISSION_LOG = []
 
 @app.route('/')
 def index():
@@ -104,6 +154,11 @@ def analizar_cables():
         return jsonify({"status": "error", "mensaje": str(e)}), 400
     except Exception as e:
         return jsonify({"status": "error", "mensaje": f"Error inesperado: {e}"}), 500
+    
+@app.route("/api/telemetry/latest")
+def telemetry():
+
+    return jsonify(latest_telemetry)
 
 @app.route('/api/solenoide', methods=['POST'])
 def controlar_solenoide():
@@ -128,12 +183,124 @@ def controlar_solenoide():
 
     return jsonify({"status": "error", "mensaje": "Comando de solenoide desconocido"}), 400
 
+# Almacenamiento de coordenadas
+@app.route("/api/mission/start", methods=["POST"])
+def mission_start():
+
+    global MISSION_RECORDING
+    global MISSION_LOG
+
+    MISSION_RECORDING = True
+    MISSION_LOG = []
+
+    print("[MISSION] Recording started.")
+
+    return jsonify({"status": "success"})
+
+@app.route("/api/mission/stop", methods=["POST"])
+def mission_stop():
+
+    global MISSION_RECORDING
+
+    save_mission_to_excel()
+
+    MISSION_RECORDING = False
+
+    print("[MISSION] Recording stopped.")
+
+    return jsonify({"status": "success"})
+
+@app.route("/api/mission/point", methods=["POST"])
+def mission_point():
+
+    global MISSION_LOG
+
+    if not MISSION_RECORDING:
+        return jsonify({"status": "ignored"})
+
+    data = request.get_json()
+
+    MISSION_LOG.append({
+        "Tiempo": datetime.now().strftime("%H:%M:%S"),
+        "Latitud": data["latitude"],
+        "Longitud": data["longitude"],
+        "Tipo": "Ruta"
+    })
+
+    return jsonify({"status": "success"})
+
+@app.route("/api/mission/waypoint", methods=["POST"])
+def mission_waypoint():
+
+    global MISSION_LOG
+
+    if not MISSION_RECORDING:
+        return jsonify({"status": "ignored"})
+
+    data = request.get_json()
+
+    MISSION_LOG.append({
+
+        "Tiempo": datetime.now().strftime("%H:%M:%S"),
+
+        "Latitud": data["latitude"],
+
+        "Longitud": data["longitude"],
+
+        "Tipo": "Waypoint"
+
+    })
+
+    return jsonify({"status": "success"})
+
+def save_mission_to_excel():
+
+    # Create the "missions" folder if it doesn't exist
+    missions_folder = Path("missions")
+    missions_folder.mkdir(exist_ok=True)
+
+    # Create the workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Mission"
+
+    # Column headers
+    ws.append([
+        "Tiempo",
+        "Latitud",
+        "Longitud",
+        "Tipo"
+    ])
+
+    # Write mission data
+    for row in MISSION_LOG:
+        ws.append([
+            row["Tiempo"],
+            row["Latitud"],
+            row["Longitud"],
+            row["Tipo"]
+        ])
+
+    # Save inside the missions folder
+    filename = missions_folder / f"Mission_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
+
+    wb.save(filename)
+
+    print(f"[MISSION] Mission saved to {filename}")
+
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
     # Ejemplo: python app.py 192.168.1.55
     if len(sys.argv) > 1:
         IP_RASPBERRY = sys.argv[1]
 
+    threading.Thread(
+        target=serial_reader,
+        daemon=True
+    ).start()
+
     print(
         f"Interfaz iniciada. Los comandos de luces se enviarán a la Raspberry en: {IP_RASPBERRY}:{PUERTO_LUCES}")
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
