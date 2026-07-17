@@ -11,15 +11,20 @@
     <script src="{{ url_for('static', filename='utils.js') }}"></script>
     <!--^^^ SIEMPRE PONER ESTE SCRIPT PRIMERO POR QUE LOS OTROS DEPENDEN DE EL ^^^ -->
     <script src="{{ url_for('static', filename='whep.js') }}"></script>
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script src="{{ url_for('static', filename='mapa.js') }}"></script>
     <script src="{{ url_for('static', filename='tareas.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='tarea-error2-snackrun.js') }}"></script>
   </head>
   <body>
     <header class="topbar">
@@ -176,17 +181,17 @@
           Agregar Waypoint
         </button>
         <div id="map" class="gnss__mapa"></div>
-<div class="route-controls">
-    <button id="startRouteBtn" class="btn-route-start">▶ Empezar</button>
-    <button id="stopRouteBtn" class="btn-route-stop">⏹ Detener</button>
-    <button id="clearRouteBtn" class="btn-route-clear">🗑 Limpiar</button>
-</div>
+        <div class="route-controls">
+          <button id="startRouteBtn" class="btn-route-start">▶ Empezar</button>
+          <button id="stopRouteBtn" class="btn-route-stop">⏹ Detener</button>
+          <button id="clearRouteBtn" class="btn-route-clear">🗑 Limpiar</button>
+        </div>
       </section>
 
       <!-- PANEL 5 — CABLES -->
       <section class="panel panel--cables">
         <h2 class="panel__title">🔌 Heist Mission — Panel de Cables</h2>
-        <p class="cables__instruccion">
+        <p class="instruccion">
           Ingresa los cables de izquierda a derecha, separados por coma.<br />
           <small>Válidos: rojo, blanco, azul, amarillo, negro</small>
         </p>
@@ -208,11 +213,39 @@
         </div>
         <div id="cables-error" class="error-box oculto"></div>
       </section>
+
+      <!-- PANEL 6 — ERROR 2: SNACK RUN -->
+      <section class="panel panel--snackrun">
+        <h2 class="panel__title">❌ Error 2: Snack Run</h2>
+        <p class="instruccion">
+          Selecciona los segmentos encendidos en cada dígito (3 filas × 4
+          columnas) tal como aparecen en el ciclo del display de la máquina.
+        </p>
+
+        <div id="err2-rows" class="err2-rows"></div>
+
+        <div class="err2-btns">
+          <button class="btn btn--analizar" id="err2-reset">Reset</button>
+          <button id="err2-demo" class="btn btn--demo">
+            Cargar ejemplo del manual
+          </button>
+          <button class="btn" id="err2-copy">Copiar secuencia</button>
+        </div>
+
+        <div class="err2-resultado">
+          <span class="err2-resultado-label">XOR por columna</span>
+          <div id="err2-result" class="err2-bytes"></div>
+        </div>
+
+        <div id="err2-seq" class="err2-secuencia"></div>
+      </section>
     </main>
 
     <script>
       let teclaPresionada = false;
+
       const indicadorSolenoide = document.getElementById("indicador-solenoide");
+
       window.addEventListener("keydown", (event) => {
         const tagActivo = document.activeElement.tagName;
         if (tagActivo === "INPUT" || tagActivo === "TEXTAREA") return;
@@ -244,6 +277,7 @@
           }, 300); // Restablece después de 300 ms
         }
       });
+
       window.addEventListener("keyup", (event) => {
         if (event.code === "Space") {
           teclaPresionada = false;
@@ -256,11 +290,52 @@
         }
       });
 
-      // Conectar automáticamente las cámaras al cargar la página
       window.addEventListener("DOMContentLoaded", () => {
+        // Conectar automáticamente las cámaras al cargar la página
         conectarCamara("cam1", "http://192.168.50.1:8889/cam1/whep");
         conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
       });
+
+      document
+        .getElementById("err2-reset")
+        .addEventListener("click", function () {
+          for (var r = 0; r < 3; r++)
+            for (var c = 0; c < 4; c++)
+              for (var k in state[r][c]) state[r][c][k] = 0;
+          renderError2Matrix();
+          computeError2Matrix();
+        });
+
+      document
+        .getElementById("err2-demo")
+        .addEventListener("click", function () {
+          var bytes = [
+            ["01001101", "01000010", "01100001", "00100001"],
+            ["00000101", "00011000", "01011010", "01001001"],
+            ["01110110", "00000100", "01100101", "01010110"],
+          ];
+          for (var r = 0; r < 3; r++) {
+            for (var c = 0; c < 4; c++) {
+              var b = bytes[r][c];
+              for (var i = 0; i < 7; i++) {
+                var k = order[i];
+                state[r][c][k] = +b[7 - i];
+              }
+            }
+          }
+          renderError2Matrix();
+          computeError2Matrix();
+        });
+
+      document
+        .getElementById("err2-copy")
+        .addEventListener("click", function () {
+          var text = document.getElementById("err2-seq").textContent;
+          navigator.clipboard.writeText(text);
+        });
+
+      renderError2Matrix();
+      computeError2Matrix();
     </script>
   </body>
 </html>
