@@ -22,6 +22,8 @@ latest_telemetry = {
     "longitude": 0,
     "altitude": 0,
 }
+
+
 def serial_reader():
 
     global latest_telemetry
@@ -57,6 +59,7 @@ def serial_reader():
 
         print(f"[SERIAL ERROR] {e}")
 
+
 IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
 PUERTO_LUCES = 5006
 PUERTO_SOLENOIDE = 5007
@@ -70,6 +73,7 @@ calculadora: CalculadoraCables = CalculadoraCables()
 
 MISSION_RECORDING = False
 MISSION_LOG = []
+
 
 @app.route('/')
 def index():
@@ -154,11 +158,13 @@ def analizar_cables():
         return jsonify({"status": "error", "mensaje": str(e)}), 400
     except Exception as e:
         return jsonify({"status": "error", "mensaje": f"Error inesperado: {e}"}), 500
-    
+
+
 @app.route("/api/telemetry/latest")
 def telemetry():
 
     return jsonify(latest_telemetry)
+
 
 @app.route('/api/solenoide', methods=['POST'])
 def controlar_solenoide():
@@ -175,8 +181,10 @@ def controlar_solenoide():
     if comando == 'PULSO_RAPIDO':
         try:
             # Reutiliza el sock_enviador para lanzar el paquete UDP al puerto 5007 de la Raspi
-            sock_enviador.sendto(b"PULSO_RAPIDO", (IP_RASPBERRY, PUERTO_SOLENOIDE))
-            print(f"[WEB] ¡PULSO_RAPIDO enviado al Solenoide! ({IP_RASPBERRY}:{PUERTO_SOLENOIDE})")
+            sock_enviador.sendto(
+                b"PULSO_RAPIDO", (IP_RASPBERRY, PUERTO_SOLENOIDE))
+            print(
+                f"[WEB] ¡PULSO_RAPIDO enviado al Solenoide! ({IP_RASPBERRY}:{PUERTO_SOLENOIDE})")
             return jsonify({"status": "success", "mensaje": "Pulso enviado de forma segura"}), 200
         except Exception as e:
             return jsonify({"status": "error", "mensaje": f"Error de red UDP: {e}"}), 500
@@ -184,6 +192,8 @@ def controlar_solenoide():
     return jsonify({"status": "error", "mensaje": "Comando de solenoide desconocido"}), 400
 
 # Almacenamiento de coordenadas
+
+
 @app.route("/api/mission/start", methods=["POST"])
 def mission_start():
 
@@ -197,6 +207,7 @@ def mission_start():
 
     return jsonify({"status": "success"})
 
+
 @app.route("/api/mission/stop", methods=["POST"])
 def mission_stop():
 
@@ -209,6 +220,7 @@ def mission_stop():
     print("[MISSION] Recording stopped.")
 
     return jsonify({"status": "success"})
+
 
 @app.route("/api/mission/point", methods=["POST"])
 def mission_point():
@@ -228,6 +240,7 @@ def mission_point():
     })
 
     return jsonify({"status": "success"})
+
 
 @app.route("/api/mission/waypoint", methods=["POST"])
 def mission_waypoint():
@@ -252,6 +265,7 @@ def mission_waypoint():
     })
 
     return jsonify({"status": "success"})
+
 
 def save_mission_to_excel():
 
@@ -288,6 +302,7 @@ def save_mission_to_excel():
 
     print(f"[MISSION] Mission saved to {filename}")
 
+
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
     # Ejemplo: python app.py 192.168.1.55
@@ -302,5 +317,3 @@ if __name__ == "__main__":
     print(
         f"Interfaz iniciada. Los comandos de luces se enviarán a la Raspberry en: {IP_RASPBERRY}:{PUERTO_LUCES}")
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-
