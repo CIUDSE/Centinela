@@ -672,16 +672,6 @@ video {
 /* ─────────────────────────────────────────
   3D VISUALIZER (Color de fondo)
 ───────────────────────────────────────── */
-.canvas-3d-wrapper {
-       flex-grow: 1;
-       min-height: 250px;
-       background: #e2e8f0; /* <-- Cambiado aquí (Gris claro) */
-       border-radius: 8px;
-       border: 1px solid rgba(255, 255, 255, 0.05);
-       position: relative;
-       overflow: hidden;
-     }
-
 /* Adaptación de clases del GY-87 para la hoja de estilos nativa del Rover */
      .panel--imu {
        display: flex;
@@ -694,24 +684,6 @@ video {
        flex-direction: column;
        gap: 12px;
        height: 100%;
-     }
-     .imu-controles {
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       gap: 10px;
-       background: rgba(255, 255, 255, 0.03);
-       padding: 8px 12px;
-       border-radius: 6px;
-       border: 1px solid rgba(255, 255, 255, 0.05);
-     }
-     .imu-controles label {
-       font-size: 0.8rem;
-       color: #aaa;
-       cursor: pointer;
-       display: flex;
-       align-items: center;
-       gap: 5px;
      }
      .imu-datos-num {
        display: grid;
@@ -756,24 +728,116 @@ video {
        pointer-events: none;
      }
 
-/* Estilo de la etiqueta IMU y GPS*/
-     .status-badge {
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: bold;
-    display: inline-block;
-    margin-left: 8px;
+/* Punto indicador base con efecto brillante */
+.dot-glow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
 }
 
-.status--on {
-    background-color: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-    border: 1px solid #2ecc71;
+/* Estado ROJO (Desconectado / Off) */
+.dot-glow--red {
+  background-color: #ff4d4d;
+  box-shadow: 0 0 8px #ff4d4d, 0 0 12px rgba(255, 77, 77, 0.6);
 }
 
-.status--off {
-    background-color: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
-    border: 1px solid #e74c3c;
+/* Estado VERDE (Conectado / Activo) */
+.dot-glow--green {
+  background-color: #2ecc71;
+  box-shadow: 0 0 8px #2ecc71, 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+/* ─────────────────────────────────────────
+   (IMU & GNSS)
+───────────────────────────────────────── */
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.panel__header .panel__title {
+  margin: 0;
+  border-bottom: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+/* Indicador de estado con punto resplandeciente */
+.status-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9aa0a6;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.dot-glow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.dot-glow--red {
+  background-color: #ff4d4d;
+  box-shadow: 0 0 8px #ff4d4d, 0 0 12px rgba(255, 77, 77, 0.6);
+}
+
+.dot-glow--green {
+  background-color: #2ecc71;
+  box-shadow: 0 0 8px #2ecc71, 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+/* ─────────────────────────────────────────
+   RECUADRO DE CONTROLES SUPERIOR (COMPACTO)
+───────────────────────────────────────── */
+.panel-controles-box,
+.imu-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+}
+
+/* Ajuste para evitar que el botón "Agregar Waypoint" se estire al 100% */
+.panel-controles-box .btn,
+.panel-controles-box #addWaypointBtn,
+.panel-controles-box .btn-waypoint {
+  width: auto !important;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  margin-bottom: 0 !important; /* Quita el margen inferior predeterminado */
+}
+
+/* Checkbox con letra pequeña y en una sola línea sin desbordar */
+.control-checkbox,
+.imu-controles label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c5c6c7;
+  font-size: 0.75rem;     /* Tamaño reducido */
+  white-space: nowrap;    /* Evita el salto de línea */
+  cursor: pointer;
+  user-select: none;
+}
+
+.control-checkbox input[type="checkbox"],
+.imu-controles input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: #00b4d8;
+  cursor: pointer;
 }
