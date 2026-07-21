@@ -75,10 +75,24 @@ MISSION_RECORDING = False
 MISSION_LOG = []
 
 
+# -------- RUTEO DE PAGINAS --------
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', pagina='home')
 
+
+@app.route('/heist')
+def heist():
+    return render_template('index.html', pagina='heist')
+
+
+@app.route('/snackRun')
+def snack_run():
+    return render_template('index.html', pagina='snackRun')
+
+
+# -------- FIN DE RUTEO DE PAGINAS --------
 
 @app.route('/api/emergencia', methods=['POST'])
 def gestionar_emergencia():

@@ -189,56 +189,12 @@
       </section>
 
       <!-- PANEL 5 — CABLES -->
-      <section class="panel panel--cables">
-        <h2 class="panel__title">🔌 Heist Mission — Panel de Cables</h2>
-        <p class="instruccion">
-          Ingresa los cables de izquierda a derecha, separados por coma.<br />
-          <small>Válidos: rojo, blanco, azul, amarillo, negro</small>
-        </p>
-        <div class="cables__input-group">
-          <input
-            type="text"
-            id="cables-input"
-            class="cables__input"
-            placeholder="Ej: azul, rojo, amarillo"
-          />
-          <button class="btn btn--analizar" onclick="analizarCables()">
-            Analizar
-          </button>
-        </div>
-        <div id="cables-resultado" class="cables__resultado oculto">
-          <span class="cables__resultado-label">✂️ Cortar cable</span>
-          <span id="cables-numero" class="cables__numero"></span>
-          <span id="cables-color" class="cables__color-badge"></span>
-        </div>
-        <div id="cables-error" class="error-box oculto"></div>
-      </section>
+      {% if pagina in ['home', 'heist'] %} {% include
+      'partials/panel_cables.html' %} {% endif %}
 
       <!-- PANEL 6 — ERROR 2: SNACK RUN -->
-      <section class="panel panel--snackrun">
-        <h2 class="panel__title">❌ Error 2: Snack Run</h2>
-        <p class="instruccion">
-          Selecciona los segmentos encendidos en cada dígito (3 filas × 4
-          columnas) tal como aparecen en el ciclo del display de la máquina.
-        </p>
-
-        <div id="err2-rows" class="err2-rows"></div>
-
-        <div class="err2-btns">
-          <button class="btn btn--analizar" id="err2-reset">Reset</button>
-          <button id="err2-demo" class="btn btn--demo">
-            Cargar ejemplo del manual
-          </button>
-          <button class="btn" id="err2-copy">Copiar secuencia</button>
-        </div>
-
-        <div class="err2-resultado">
-          <span class="err2-resultado-label">XOR por columna</span>
-          <div id="err2-result" class="err2-bytes"></div>
-        </div>
-
-        <div id="err2-seq" class="err2-secuencia"></div>
-      </section>
+      {% if pagina in ['home', 'snackRun'] %} {% include
+      'partials/panel_error2_snackrun.html' %} {% endif %}
     </main>
 
     <script>
@@ -295,47 +251,9 @@
         conectarCamara("cam1", "http://192.168.50.1:8889/cam1/whep");
         conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
       });
-
-      document
-        .getElementById("err2-reset")
-        .addEventListener("click", function () {
-          for (var r = 0; r < 3; r++)
-            for (var c = 0; c < 4; c++)
-              for (var k in state[r][c]) state[r][c][k] = 0;
-          renderError2Matrix();
-          computeError2Matrix();
-        });
-
-      document
-        .getElementById("err2-demo")
-        .addEventListener("click", function () {
-          var bytes = [
-            ["01001101", "01000010", "01100001", "00100001"],
-            ["00000101", "00011000", "01011010", "01001001"],
-            ["01110110", "00000100", "01100101", "01010110"],
-          ];
-          for (var r = 0; r < 3; r++) {
-            for (var c = 0; c < 4; c++) {
-              var b = bytes[r][c];
-              for (var i = 0; i < 7; i++) {
-                var k = order[i];
-                state[r][c][k] = +b[7 - i];
-              }
-            }
-          }
-          renderError2Matrix();
-          computeError2Matrix();
-        });
-
-      document
-        .getElementById("err2-copy")
-        .addEventListener("click", function () {
-          var text = document.getElementById("err2-seq").textContent;
-          navigator.clipboard.writeText(text);
-        });
-
-      renderError2Matrix();
-      computeError2Matrix();
     </script>
+    {% if pagina in ['home', 'snackRun'] %}
+    <script src="{{ url_for('static', filename='snackrun-listeners.js') }}"></script>
+    {% endif %}
   </body>
 </html>
