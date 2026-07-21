@@ -668,3 +668,112 @@ video {
     width: 100%;
   }
 }
+
+/* ─────────────────────────────────────────
+  3D VISUALIZER (Color de fondo)
+───────────────────────────────────────── */
+.canvas-3d-wrapper {
+       flex-grow: 1;
+       min-height: 250px;
+       background: #e2e8f0; /* <-- Cambiado aquí (Gris claro) */
+       border-radius: 8px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       position: relative;
+       overflow: hidden;
+     }
+
+/* Adaptación de clases del GY-87 para la hoja de estilos nativa del Rover */
+     .panel--imu {
+       display: flex;
+       flex-direction: column;
+       gap: 15px;
+       grid-column: span 1;
+     }
+     .imu-panel-container {
+       display: flex;
+       flex-direction: column;
+       gap: 12px;
+       height: 100%;
+     }
+     .imu-controles {
+       display: flex;
+       align-items: center;
+       justify-content: space-between;
+       gap: 10px;
+       background: rgba(255, 255, 255, 0.03);
+       padding: 8px 12px;
+       border-radius: 6px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+     }
+     .imu-controles label {
+       font-size: 0.8rem;
+       color: #aaa;
+       cursor: pointer;
+       display: flex;
+       align-items: center;
+       gap: 5px;
+     }
+     .imu-datos-num {
+       display: grid;
+       grid-template-columns: repeat(3, 1fr);
+       gap: 10px;
+     }
+     .imu-card {
+       background: rgba(0, 0, 0, 0.3);
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       border-radius: 6px;
+       padding: 8px;
+       text-align: center;
+     }
+     .imu-card__label {
+       font-size: 0.7rem;
+       color: #777;
+       text-transform: uppercase;
+       display: block;
+       margin-bottom: 3px;
+     }
+     .imu-card__val {
+       font-family: monospace;
+       font-size: 1.1rem;
+       font-weight: bold;
+       color: #00b4d8;
+     }
+     .canvas-3d-wrapper {
+       flex-grow: 1;
+       min-height: 250px;
+       background: #05070c;
+       border-radius: 8px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       position: relative;
+       overflow: hidden;
+     }
+     .canvas-3d-instructions {
+       position: absolute;
+       bottom: 8px;
+       left: 8px;
+       font-size: 0.65rem;
+       color: #555;
+       pointer-events: none;
+     }
+
+/* Estilo de la etiqueta IMU y GPS*/
+     .status-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.status--on {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.status--off {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
