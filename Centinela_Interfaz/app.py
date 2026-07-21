@@ -266,7 +266,6 @@ def controlar_solenoide():
 
     return jsonify({"status": "error", "mensaje": "Comando de solenoide desconocido"}), 400
 
-<<<<<<< HEAD
 
 # Inicio de GY-87
 # =========================================================================
@@ -490,10 +489,9 @@ class MainWindow(QMainWindow):
 @app.route('/api/telemetria', methods=['GET'])
 def obtener_telemetria():
     return datos_telemetria
-=======
+
+
 # Almacenamiento de coordenadas
-
-
 @app.route("/api/mission/start", methods=["POST"])
 def mission_start():
 
@@ -601,8 +599,6 @@ def save_mission_to_excel():
     wb.save(filename)
 
     print(f"[MISSION] Mission saved to {filename}")
->>>>>>> 917cf05a71313a5c0dde9f982929113dfc9b8080
-
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
