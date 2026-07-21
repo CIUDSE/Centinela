@@ -60,6 +60,11 @@ h4 {
   font-size: 0.9rem;
 }
 
+.instruccion {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
 /* ─────────────────────────────────────────
    TOPBAR
 ───────────────────────────────────────── */
@@ -323,14 +328,14 @@ video {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
-.route-controls{
-    display:flex;
-    gap:10px;
-    margin-bottom:12px;
+.route-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.route-controls button{
-    flex:1;
+.route-controls button {
+  flex: 1;
 }
 /* BOTÓN EMPEZAR RUTA */
 .btn-route-start {
@@ -340,7 +345,7 @@ video {
   border: 1px solid #22c55e;
   border-radius: 8px;
 
-  background: rgba(34,197,94,.15);
+  background: rgba(34, 197, 94, 0.15);
   color: #22c55e;
 
   cursor: pointer;
@@ -367,7 +372,7 @@ video {
   border: 1px solid #f59e0b;
   border-radius: 8px;
 
-  background: rgba(245,158,11,.15);
+  background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
 
   cursor: pointer;
@@ -388,14 +393,13 @@ video {
 }
 /* BOTÓN LIMPIAR RUTA */
 .btn-route-clear {
-
   width: 100%;
   padding: 12px;
 
   border: 1px solid #ef4444;
   border-radius: 8px;
 
-  background: rgba(239,68,68,.15);
+  background: rgba(239, 68, 68, 0.15);
   color: #f87171;
 
   cursor: pointer;
@@ -421,11 +425,6 @@ video {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.cables__instruccion {
-  font-size: 0.85rem;
-  color: #aaa;
 }
 
 .cables__input-group {
@@ -476,6 +475,94 @@ video {
   font-size: 0.9rem;
   text-transform: capitalize;
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ─────────────────────────────────────────
+   PANEL 6 — ERROR 2: SNACK RUN
+───────────────────────────────────────── */
+
+.panel--snackrun {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.err2-rows {
+  margin: 16px 0;
+}
+
+.err2-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.err2-row-label {
+  width: 16px;
+  font-size: 12px;
+  color: #888;
+}
+
+.err2-digit {
+  text-align: center;
+}
+
+.err2-digit svg {
+  cursor: pointer;
+}
+
+.err2-digit-bin {
+  font-family: monospace;
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+.err2-btns {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.err2-resultado {
+  background: #1a1a1a;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.err2-resultado-label {
+  color: #888;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.err2-bytes {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.err2-bytes > div div:last-child {
+  color: #00b4d8;
+}
+
+.err2-secuencia {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.err2-seg {
+  cursor: pointer;
+  transition: fill 0.1s ease;
+}
+
+.err2-seg:hover {
+  fill: #e24b4a99 !important;
 }
 
 /* ─────────────────────────────────────────
@@ -580,4 +667,113 @@ video {
     flex: none;
     width: 100%;
   }
+}
+
+/* ─────────────────────────────────────────
+  3D VISUALIZER (Color de fondo)
+───────────────────────────────────────── */
+.canvas-3d-wrapper {
+       flex-grow: 1;
+       min-height: 250px;
+       background: #e2e8f0; /* <-- Cambiado aquí (Gris claro) */
+       border-radius: 8px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       position: relative;
+       overflow: hidden;
+     }
+
+/* Adaptación de clases del GY-87 para la hoja de estilos nativa del Rover */
+     .panel--imu {
+       display: flex;
+       flex-direction: column;
+       gap: 15px;
+       grid-column: span 1;
+     }
+     .imu-panel-container {
+       display: flex;
+       flex-direction: column;
+       gap: 12px;
+       height: 100%;
+     }
+     .imu-controles {
+       display: flex;
+       align-items: center;
+       justify-content: space-between;
+       gap: 10px;
+       background: rgba(255, 255, 255, 0.03);
+       padding: 8px 12px;
+       border-radius: 6px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+     }
+     .imu-controles label {
+       font-size: 0.8rem;
+       color: #aaa;
+       cursor: pointer;
+       display: flex;
+       align-items: center;
+       gap: 5px;
+     }
+     .imu-datos-num {
+       display: grid;
+       grid-template-columns: repeat(3, 1fr);
+       gap: 10px;
+     }
+     .imu-card {
+       background: rgba(0, 0, 0, 0.3);
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       border-radius: 6px;
+       padding: 8px;
+       text-align: center;
+     }
+     .imu-card__label {
+       font-size: 0.7rem;
+       color: #777;
+       text-transform: uppercase;
+       display: block;
+       margin-bottom: 3px;
+     }
+     .imu-card__val {
+       font-family: monospace;
+       font-size: 1.1rem;
+       font-weight: bold;
+       color: #00b4d8;
+     }
+     .canvas-3d-wrapper {
+       flex-grow: 1;
+       min-height: 250px;
+       background: #05070c;
+       border-radius: 8px;
+       border: 1px solid rgba(255, 255, 255, 0.05);
+       position: relative;
+       overflow: hidden;
+     }
+     .canvas-3d-instructions {
+       position: absolute;
+       bottom: 8px;
+       left: 8px;
+       font-size: 0.65rem;
+       color: #555;
+       pointer-events: none;
+     }
+
+/* Estilo de la etiqueta IMU y GPS*/
+     .status-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.status--on {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.status--off {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
 }

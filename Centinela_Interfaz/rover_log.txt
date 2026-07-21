@@ -1,0 +1,110 @@
+[2026-07-20 16:04:26] TX: 
+[2026-07-20 16:04:26] RX: competencia-security-login:
+[2026-07-20 16:10:13] TX: help
+[2026-07-20 16:10:13] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 16:10:19] TX: ls
+[2026-07-20 16:10:19] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 16:10:41] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 16:10:54] TX: logout
+[2026-07-20 16:10:54] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 16:11:00] ERROR: Error al recibir datos: [WinError 10038] An operation was attempted on something that is not a socket
+[2026-07-20 17:03:12] TX: 
+[2026-07-20 17:03:12] RX: competencia-security-login:
+[2026-07-20 17:03:46] TX: dw
+[2026-07-20 17:03:46] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 17:04:12] TX: BovedaBOVEDA2026
+[2026-07-20 17:04:12] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 17:04:16] TX: BOVEDA2026
+[2026-07-20 17:04:16] RX: [SUCCESS] Acceso concedido.
+Bienvenido a la terminal de seguridad.
+
+root@security-console:~#
+[2026-07-20 17:24:42] TX: 
+[2026-07-20 17:24:42] RX: competencia-security-login:
+[2026-07-20 17:27:05] TX: 
+[2026-07-20 17:27:05] RX: competencia-security-login:
+[2026-07-20 17:30:52] TX: help
+[2026-07-20 17:30:52] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 17:30:56] TX: help
+[2026-07-20 17:30:56] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 17:31:14] TX: BOVEDA2026
+[2026-07-20 17:31:14] RX: [SUCCESS] Acceso concedido.
+Bienvenido a la terminal de seguridad.
+
+root@security-console:~#
+[2026-07-20 17:31:23] TX: help
+[2026-07-20 17:31:23] RX: Comandos disponibles: ls, cat secret_code.txt, clear, logout
+
+root@security-console:~#
+[2026-07-20 17:31:30] TX: ls
+[2026-07-20 17:31:30] RX: clearance.txt  vault_logs/  secret_code.txt
+
+root@security-console:~#
+[2026-07-20 17:31:43] TX: cat secret_code.txt
+[2026-07-20 17:31:43] RX: CÓDIGO DE LA BÓVEDA: 7412-9630-A
+
+root@security-console:~#
+[2026-07-20 17:32:06] TX: hola
+[2026-07-20 17:32:06] RX: bash: hola: comando no encontrado
+
+root@security-console:~#
+[2026-07-20 17:32:24] TX: logout
+[2026-07-20 17:32:24] RX: Sesión cerrada.
+
+competencia-security-login:
+[2026-07-20 17:35:14] TX: 
+[2026-07-20 17:35:14] RX: competencia-security-login:
+[2026-07-20 17:35:23] TX: help
+[2026-07-20 17:35:23] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 17:35:27] TX: BOVEDA2026
+[2026-07-20 17:35:27] RX: [SUCCESS] Acceso concedido.
+Bienvenido a la terminal de seguridad.
+
+root@security-console:~#
+[2026-07-20 17:35:30] TX: help
+[2026-07-20 17:35:30] RX: Comandos disponibles: ls, cat secret_code.txt, clear, logout
+
+root@security-console:~#
+[2026-07-20 17:36:12] TX: ls
+[2026-07-20 17:36:14] TX: 
+[2026-07-20 17:36:18] TX: ls
+[2026-07-20 17:36:43] TX: ls
+[2026-07-20 17:37:47] TX: 
+[2026-07-20 17:37:47] RX: competencia-security-login:
+[2026-07-20 18:18:50] TX: 
+[2026-07-20 18:18:50] RX: competencia-security-login:
+[2026-07-20 18:18:54] TX: help
+[2026-07-20 18:18:54] RX: [ERROR] Contraseña incorrecta.
+
+competencia-security-login:
+[2026-07-20 18:18:59] TX: BOVEDA2026
+[2026-07-20 18:18:59] RX: [SUCCESS] Acceso concedido.
+Bienvenido a la terminal de seguridad.
+
+root@security-console:~#
+[2026-07-20 18:19:08] TX: ls
+[2026-07-20 18:19:08] RX: clearance.txt  vault_logs/  secret_code.txt
+
+root@security-console:~#
+[2026-07-20 18:20:10] TX: cat secret_code.txt
+[2026-07-20 18:20:10] RX: CÓDIGO DE LA BÓVEDA: 7412-9630-A
+
+root@security-console:~#
