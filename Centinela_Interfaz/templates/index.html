@@ -24,6 +24,15 @@
     ></script>
     <script src="{{ url_for('static', filename='mapa.js') }}"></script>
     <script src="{{ url_for('static', filename='tareas.js') }}"></script>
+    <script src="{{ url_for('static', filename='tarea-error2-snackrun.js') }}"></script>
+    <!-- Librería Three.js para renderizar la orientación del Rover en 3D -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+   <!-- Librería para renderizar un archivo .gltf o .glb en la interfaz -->
+   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+   <!-- Librería Chart.js para telemetría en tiempo real -->
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <!-- Importar archivo de telemetría para la interfaz -->
+   <script src="{{ url_for('static', filename='telemetria.js') }}"></script>
 
   </head>
   <body>
@@ -271,6 +280,9 @@
         </div>
         <div id="cables-error" class="error-box oculto"></div>
       </section>
+      {% if pagina in ['home', 'heist'] %} {% include
+      'partials/panel_cables.html' %} {% endif %}
+
       <!-- PANEL 7 — Heist Mission: Telegrafo Morse -->
       <section class="panel panel--morse">
         <h2 class="panel__title">⚙️ Heist Mission — Telegrafo Morse</h2>
@@ -295,7 +307,8 @@
         </div>
         <div id="morse-error" class="error-box oculto"></div>
       </section>
-      <!-- PANEL 6 — ERROR 2: SNACK RUN -->
+
+      <!-- PANEL 7 — ERROR 2: SNACK RUN -->
       <section class="panel panel--snackrun">
         <h2 class="panel__title">❌ Error 2: Snack Run</h2>
         <p class="instruccion">
@@ -320,6 +333,8 @@
 
         <div id="err2-seq" class="err2-secuencia"></div>
       </section>
+      {% if pagina in ['home', 'snackRun'] %} {% include
+      'partials/panel_error2_snackrun.html' %} {% endif %}
     </main>
 
  <script>
@@ -524,12 +539,6 @@
         }
       });
 
-      window.addEventListener("DOMContentLoaded", () => {
-        // Conectar automáticamente las cámaras al cargar la página
-        conectarCamara("cam1", "http://192.168.50.1:8889/cam1/whep");
-        conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
-      });
-
       document
         .getElementById("err2-reset")
         .addEventListener("click", function () {
@@ -605,6 +614,15 @@
         divError.classList.remove('oculto');
       }
     }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        // Conectar automáticamente las cámaras al cargar la página
+        conectarCamara("cam1", "http://192.168.50.1:8889/cam1/whep");
+        conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
+      });  
     </script>
+    {% if pagina in ['home', 'snackRun'] %}
+    <script src="{{ url_for('static', filename='snackrun-listeners.js') }}"></script>
+    {% endif %}
   </body>
 </html>
