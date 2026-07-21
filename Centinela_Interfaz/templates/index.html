@@ -213,7 +213,30 @@
         </div>
         <div id="cables-error" class="error-box oculto"></div>
       </section>
-
+      <!-- PANEL 7 — Heist Mission: Telegrafo Morse -->
+      <section class="panel panel--morse">
+        <h2 class="panel__title">⚙️ Heist Mission — Telegrafo Morse</h2>
+        <p class="instruccion">
+          Ingresa el codigo de la boveda y presiona Enviar.<br />
+          <small>El rover pulsara el boton en codigo Morse automaticamente.</small>
+        </p>
+        <div class="cables__input-group">
+          <input
+            type="text"
+            id="morse-input"
+            class="cables__input"
+            placeholder="Ej: ABC123"
+          />
+          <button class="btn btn--analizar" onclick="enviarMorse()">
+            Enviar
+          </button>
+        </div>
+        <div id="morse-traduccion" class="cables__resultado oculto">
+          <span class="cables__resultado-label">Cadena Morse</span>
+          <span id="morse-cadena" style="font-family: monospace; font-size: 0.85rem; word-break: break-all;"></span>
+        </div>
+        <div id="morse-error" class="error-box oculto"></div>
+      </section>
       <!-- PANEL 6 — ERROR 2: SNACK RUN -->
       <section class="panel panel--snackrun">
         <h2 class="panel__title">❌ Error 2: Snack Run</h2>
@@ -336,6 +359,41 @@
 
       renderError2Matrix();
       computeError2Matrix();
+      async function enviarMorse() {
+      const codigo = document.getElementById('morse-input').value.trim();
+      const divTraduccion = document.getElementById('morse-traduccion');
+      const divError = document.getElementById('morse-error');
+
+      divTraduccion.classList.add('oculto');
+      divError.classList.add('oculto');
+
+      if (!codigo) {
+        divError.textContent = 'Ingresa el codigo de la boveda antes de enviar.';
+        divError.classList.remove('oculto');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/morse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo: codigo })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('morse-cadena').textContent = data.cadena_morse;
+          divTraduccion.classList.remove('oculto');
+        } else {
+          divError.textContent = data.mensaje;
+          divError.classList.remove('oculto');
+        }
+      } catch (err) {
+        divError.textContent = 'Error de red: ' + err.message;
+        divError.classList.remove('oculto');
+      }
+    }
     </script>
   </body>
 </html>

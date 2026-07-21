@@ -74,6 +74,20 @@ calculadora: CalculadoraCables = CalculadoraCables()
 MISSION_RECORDING = False
 MISSION_LOG = []
 
+PUERTO_MORSE = 5005
+
+DICCIONARIO_MORSE = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----',
+    '.': '.-.-.-', ',': '--..--', ':': '---...', '?': '..--..',
+    "'": '.----.', '-': '-....-', '/': '-..-.', '(': '-.--.',
+    ')': '-.--.-', '"': '.-..-.', '=': '-...-', '+': '.-.-.', '@': '.--.-.'
+}
 
 @app.route('/')
 def index():
@@ -266,6 +280,42 @@ def mission_waypoint():
 
     return jsonify({"status": "success"})
 
+@app.route('/api/morse', methods=['POST'])
+def enviar_morse():
+    if EMERGENCIA_ACTIVA:
+        return jsonify({"status": "blocked", "mensaje": "E-STOP activo."}), 403
+
+    data = request.get_json()
+    codigo = data.get('codigo', '').strip().upper()
+
+    if not codigo:
+        return jsonify({"status": "error", "mensaje": "Codigo vacio."}), 400
+
+    palabras = codigo.split(' ')
+    frase_traducida = []
+    caracteres_invalidos = []
+
+    for palabra in palabras:
+        letras = []
+        for c in palabra:
+            if c in DICCIONARIO_MORSE:
+                letras.append(DICCIONARIO_MORSE[c])
+            else:
+                caracteres_invalidos.append(c)
+        if letras:
+            frase_traducida.append(' '.join(letras))
+
+    if caracteres_invalidos:
+        return jsonify({"status": "error", "mensaje": f"Caracteres no validos: {caracteres_invalidos}"}), 400
+
+    cadena_morse = '   '.join(frase_traducida)
+
+    try:
+        sock_enviador.sendto(cadena_morse.encode('utf-8'), (IP_RASPBERRY, PUERTO_MORSE))
+        print(f"[MORSE] Enviado: {cadena_morse}")
+        return jsonify({"status": "success", "cadena_morse": cadena_morse}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "mensaje": str(e)}), 500
 
 def save_mission_to_excel():
 
