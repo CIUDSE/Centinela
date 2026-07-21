@@ -167,7 +167,7 @@ def controlar_solenoide():
 
 @app.route('/api/imu', methods=['GET'])
 def obtener_imu():
-    return datos_imu
+    return jsonify(datos_telemetria)
 
 # API Única para la Estación Terrena --- Para el mapa   
 @app.route('/api/telemetria', methods=['GET'])
