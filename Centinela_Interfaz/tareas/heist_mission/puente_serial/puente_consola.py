@@ -30,7 +30,7 @@ class Puente_Serial(SerialInterface):
     `ip_rover` : str
         The IP address of the rover to which the bridge will connect. Default is "127.0.0.1".
     `port` : int
-        The port number for the UDP socket connection. Default is 5007.
+        The port number for the UDP socket connection. Default is 5008.
     `baudrate` : int
         The baud rate for the serial connection. Default is 115200.
     `serial_port` : str
@@ -40,7 +40,7 @@ class Puente_Serial(SerialInterface):
 
 
     """
-    def __init__(self, ip_rover:Optional[str] = "127.0.0.1", port: Optional[int] = 5007, baudrate:Optional[int] = 115200,serial_port:Optional[str] = "COM3", timeout: Optional[float] = 0.1) -> None:
+    def __init__(self, ip_rover:Optional[str] = "127.0.0.1", port: Optional[int] = 5008, baudrate:Optional[int] = 115200,serial_port:Optional[str] = "/dev/ttyUSB0", timeout: Optional[float] = 0.1) -> None:
         self.ip_rover:str = ip_rover
         self.port = port
         self.baudrate = baudrate
@@ -126,8 +126,10 @@ class Puente_Serial(SerialInterface):
             self.arduino_serial = self.serial_lib.Serial(self.serial_port, self.baudrate, timeout=self.timeout)
             self.hardware_real = True
             ic(f"Conectado al XLR3 en {self.serial_port}")
-        except Exception as e:
-            ic(f"Puerto {str(self.port)} ocupado o no disponible. INICIANDO MODO SIMULACIÓN de Consola.")
+        except Exception:
+            self.hardware_real = False
+            self.arduino_serial = None
+            ic(f"Puerto {self.serial_port} no disponible. INICIANDO MODO SIMULACIÓN.")
 
     @_exceptions("Error al iniciar el puente serial")
     def iniciar_puente_consola(self) -> None:
@@ -158,7 +160,7 @@ class Puente_Serial(SerialInterface):
         {None}
         """
         self.socket:socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.ip_rover, self.port))
+        self.socket.bind(("0.0.0.0", self.port))
 
         ic(f"PUENTE SERIAL XLR3 (HARDWARE REAL: {self.hardware_real})")
         ic("Esperando señal...")
@@ -173,6 +175,7 @@ class Puente_Serial(SerialInterface):
 
         while True:
             data, addr = self.socket.recvfrom(1024)
+            ic(f"RX {addr}: {data.decode(errors='ignore').strip()}")
             self.direccion_base = addr  # Guarda IP para saber a dónde responder
             comando_usuario = data.decode('utf-8')
 
@@ -207,7 +210,7 @@ class Puente_Serial(SerialInterface):
                         respuesta = "\nSesión cerrada.\n" + self.prompt
                     else:
                         respuesta = f"\nbash: {comando_limpio}: comando no encontrado\n" + self.prompt
-                
+                ic(f"TX: {respuesta.strip()}")
                 self.socket.sendto(respuesta.encode('utf-8'), self.direccion_base)
                     
 
@@ -244,8 +247,8 @@ class Puente_Serial(SerialInterface):
         while self.hardware_real and self.arduino_serial and self.arduino_serial.is_open:
             try:
                 # Verificar si hay bytes esperando en el cable físico
-                if self.arduino_serial.in_available() > 0:
-                    datos = self.arduino_serial.read(self.arduino_serial.in_available())
+                if self.arduino_serial.in_waiting > 0:
+                    datos = self.arduino_serial.read(self.arduino_serial.in_waiting)
                     if self.direccion_base:
                         self.socket.sendto(datos, self.direccion_base)
             except Exception as e:

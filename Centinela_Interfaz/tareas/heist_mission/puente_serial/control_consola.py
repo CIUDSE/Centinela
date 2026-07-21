@@ -15,9 +15,6 @@ class RoverProtocol(Protocol):
     def escuchar_rover(self) -> None:
         ...
 
-    def monitor_conexion(self) -> None:
-        ...
-
     def enviar_comando(self, comando: str) -> None:
         ...
     
@@ -47,7 +44,6 @@ class RoverConnection(RoverProtocol):
         self.sock:socket.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.settimeout(1)  # Establece un tiempo de espera para la conexión
 
-        self.ultimo_mensaje = time.time()
         self.activo = True
 
     def guardar_log(self, tipo: str, mensaje: str) -> None:
@@ -84,30 +80,17 @@ class RoverConnection(RoverProtocol):
             try:
                 data, _ = self.sock.recvfrom(4096)
                 mensaje = data.decode('utf-8', errors='ignore')
-                self.ultimo_mensaje = time.time()
                 print(mensaje, end='', flush=True)
                 self.guardar_log("RX", mensaje.strip())
             except socket.timeout:
                 continue
+            except OSError:
+                    break
+
             except Exception as e:
                 self.guardar_log("ERROR", f"Error al recibir datos: {e}")
                 break
 
-    def monitor_conexion(self) -> None:
-        """
-        Supervisa continuamente el estado de la comunicación
-
-        Si el rover deja de enviar información durante más de 10 segundos, se muestra una advertencia al operador.
-
-        """
-        while self.activo:
-            tiempo = time.time() - self.ultimo_mensaje
-            if tiempo > 10:  # Si no hay respuesta en 10 segundos
-
-                print("\n[ADVERTENCIA] El Rover lleva más de 10 segundos sin responder.\n")
-            
-            self.ultimo_mensaje = time.time()  # Reinicia el temporizador
-            time.sleep(1)
 
 
     def enviar_comando(self, comando: str) -> None:
@@ -119,47 +102,54 @@ class RoverConnection(RoverProtocol):
         `comando`:str Comando que será enviado al rover.   
         """
         
-        self.sock.sendto(f"{comando}\n".encode('utf-8'), (self.ip, self.puerto))
+        try:
+            self.sock.sendto(
+                f"{comando}\n".encode("utf-8"),
+                (self.ip, self.puerto)
+            )
 
-        self.guardar_log("TX", comando)
+            self.guardar_log("TX", comando)
+
+        except OSError:
+            pass
 
     def cerrar_conexion(self) -> None:
         """
         Finaliza la comunicación y libera el socket UDP
         """
         self.activo = False
-        self.sock.close()
+        try:
+            self.sock.close()
+        except Exception:
+            pass
 
     def iniciar_control_base(self, input_command:Optional[str] = "") -> None:
         """
         Inicia la terminal de control de la estación terrena, estableciendo la comunicación con el rover a través del puente inalámbrico.
 
-        Crea la conexión con el rover, inicia los hilos de recepción y monitoreo, y mantiene un ciclo continuo para enviar comandos escritos por el operador.
+        Crea la conexión con el rover, inicia los hilos de recepción, y mantiene un ciclo continuo para enviar comandos escritos por el operador.
 
         Returns
         ----------
         `None`
         """
         IP_DESTINO:str = "127.0.0.1"
-        PUERTO:int = 5007
+        PUERTO:int = 5008
 
         if len(sys.argv) > 1:
-            IP_DESTINO = sys.argv[1]
+            self.ip = sys.argv[1]
 
         if self.ip and self.puerto:
 
             ic("====================================")
             ic(" Terminal de Control del Rover")
             ic("====================================")
-            ic(f"Puente inalámbrico: {IP_DESTINO}:{PUERTO}")
+            ic(f"Puente inalámbrico: {self.ip}:{self.puerto}")
             ic("Escriba 'exit' para salir.\n")
 
             #Se inicia el primer hilo#
             hilo_receptor = threading.Thread(target=self.escuchar_rover, daemon=True)
             hilo_receptor.start()
-
-            hilo_monitor = threading.Thread(target=self.monitor_conexion, daemon=True)
-            hilo_monitor.start()
 
             time.sleep(0.2)
 
@@ -181,7 +171,17 @@ class RoverConnection(RoverProtocol):
             finally:
                 self.cerrar_conexion()
                 ic("\nConexión finalizada correctamente.")
-                
 
+if __name__ == "__main__":
+
+    IP_PUENTE = "127.0.0.1"  # pruebas locales
+    # IP_PUENTE = "192.168.1.50"  # Raspberry real
+
+    rover = RoverConnection(
+        IP_PUENTE,
+        5008
+    )
+
+    rover.iniciar_control_base()
 
 
