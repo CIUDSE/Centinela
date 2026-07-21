@@ -1,4 +1,7 @@
 # CORRE EN LA LAPTOP (ESTACIÓN TERRENA)
+from openpyxl import Workbook
+from datetime import datetime
+from tareas.heist_mission.calculadora_cables import CalculadoraCables
 import socket
 import sys
 import os
@@ -19,9 +22,6 @@ datos_telemetria = {
     "lat": 32.514, "lng": -117.038
 }
 
-from tareas.heist_mission.calculadora_cables import CalculadoraCables
-from datetime import datetime
-from openpyxl import Workbook
 
 app = Flask(__name__)
 
@@ -55,6 +55,7 @@ DICCIONARIO_MORSE = {
 }
 
 # -------- RUTEO DE PAGINAS --------
+
 
 @app.route('/')
 def index():
@@ -183,7 +184,9 @@ def controlar_solenoide():
 def obtener_imu():
     return jsonify(datos_telemetria)
 
-# API Única para la Estación Terrena --- Para el mapa   
+# API Única para la Estación Terrena --- Para el mapa
+
+
 @app.route('/api/telemetria', methods=['GET'])
 def obtener_telemetria():
     return datos_telemetria
@@ -257,6 +260,7 @@ def mission_waypoint():
 
     return jsonify({"status": "success"})
 
+
 @app.route('/api/morse', methods=['POST'])
 def enviar_morse():
     if EMERGENCIA_ACTIVA:
@@ -288,11 +292,13 @@ def enviar_morse():
     cadena_morse = '   '.join(frase_traducida)
 
     try:
-        sock_enviador.sendto(cadena_morse.encode('utf-8'), (IP_RASPBERRY, PUERTO_MORSE))
+        sock_enviador.sendto(cadena_morse.encode('utf-8'),
+                             (IP_RASPBERRY, PUERTO_MORSE))
         print(f"[MORSE] Enviado: {cadena_morse}")
         return jsonify({"status": "success", "cadena_morse": cadena_morse}), 200
     except Exception as e:
         return jsonify({"status": "error", "mensaje": str(e)}), 500
+
 
 def save_mission_to_excel():
 
@@ -328,6 +334,7 @@ def save_mission_to_excel():
     wb.save(filename)
 
     print(f"[MISSION] Mission saved to {filename}")
+
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
