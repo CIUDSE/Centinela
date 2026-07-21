@@ -360,29 +360,3 @@ document.addEventListener("DOMContentLoaded", () => {
         loopSimulacion();
     }
 });
-
-// Actualiza el indicador del IMU
-function setEstadoIMU(conectado) {
-    const el = document.getElementById("st-imu");
-    if (!el) return;
-    if (conectado) {
-        el.textContent = "🟢 Conectado";
-        el.className = "status-badge status--on";
-    } else {
-        el.textContent = "🔴 Desconectado";
-        el.className = "status-badge status--off";
-    }
-}
-
-// Actualiza el indicador del GPS
-function setEstadoGPS(conectado) {
-    const el = document.getElementById("st-gps");
-    if (!el) return;
-    if (conectado) {
-        el.textContent = "🟢 Fijado (Fix)";
-        el.className = "status-badge status--on";
-    } else {
-        el.textContent = "🔴 Sin señal";
-        el.className = "status-badge status--off";
-    }
-}

@@ -182,13 +182,19 @@
         </div>
       </section>
 
-      <!-- PANEL 4 — Giroscopio y Actitud GY-87 -->
-      <section class="panel panel--imu">
-        <h2 class="panel__title">🧭 Orientación y Actitud (GY-87)</h2>
-        <h3>
-          Sensor IMU
-          <span id="st-imu" class="status-badge status--off">🔴 Off</span>
-        </h3>
+<!-- PANEL 4 — Giroscopio y Actitud GY-87 -->
+<section class="panel panel--imu">
+    <h2 class="panel__title">🧭 ORIENTACIÓN Y ACTITUD (GY-87)</h2>
+
+  <div class="imu-panel-container">
+        <!-- Controles superiores -->
+    <div class="imu-controles">
+      <button id="btn-conectar-imu" class="btn btn--on">🔌 Conectar USB</button>
+      <label>
+        <input type="checkbox" id="chk-simular-imu" checked />
+        Simular Datos Teóricos
+      </label>
+    </div>
 
         <div class="imu-panel-container">
           <!-- Controles superiores -->
@@ -282,20 +288,16 @@
       <!-- PANEL 5 — GNSS -->
       <section class="panel panel--gnss">
         <h2 class="panel__title">Coordenadas GNSS</h2>
-        <h3>
-          Módulo GPS
-          <span id="st-gps" class="status-badge status--off">🔴 Sin señal</span>
-        </h3>
         <!-- Checkbox de Simulación para el GPS/Mapa -->
-        <div class="simulacion-control" style="margin-bottom: 10px">
-          <label style="color: #ccc; font-size: 0.85rem; cursor: pointer">
-            <input type="checkbox" id="chk-simular-gps" checked />
-            🎲 Simular movimiento GPS (Prueba)
+        
+        <div class="panel-controles-box">
+          <button id="addWaypointBtn" class="btn-waypoint">Agregar Waypoint</button>
+          <label class="control-checkbox">
+            <input type="checkbox" id="chk-simular-gps" checked/> 
+              Simular movimiento GPS
           </label>
         </div>
-        <button id="addWaypointBtn" class="btn-waypoint">
-          Agregar Waypoint
-        </button>
+        
         <div id="map" class="gnss__mapa"></div>
         <div class="route-controls">
           <button id="startRouteBtn" class="btn-route-start">▶ Empezar</button>
@@ -407,42 +409,6 @@
           },
         );
 
-        /*
-         // --- MODELO 3D DE UN ROVER --- USAR COMO REFERENCIA PARA CREAR UN ROVER SIMPLIFICADO EN THREE.JS
-         roverMesh = new THREE.Group();
-
-         // Chasis principal (caja metálica central)
-         const chasisGeo = new THREE.BoxGeometry(2, 0.6, 1.2);
-         const chasisMat = new THREE.MeshStandardMaterial({ color: 0x4f5d75, metalness: 0.8, roughness: 0.2 });
-         const chasis = new THREE.Mesh(chasisGeo, chasisMat);
-         roverMesh.add(chasis);
-
-         // Ruedas (Cilindros oscuros)
-         const ruedaGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
-         const ruedaMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-        
-         const posicionesRuedas = [
-             [-0.7, -0.4, 0.7],  [-0.7, -0.4, -0.7],
-             [0.7, -0.4, 0.7],   [0.7, -0.4, -0.7]
-         ];
-        
-         posicionesRuedas.forEach(pos => {
-             const rueda = new THREE.Mesh(ruedaGeo, ruedaMat);
-             rueda.position.set(pos[0], pos[1], pos[2]);
-             rueda.rotation.x = Math.PI / 2; // Acostar cilindros
-             roverMesh.add(rueda);
-         });
-
-         // Puntero de antena / mástil (Eje frontal indicador)
-         const mastilGeo = new THREE.BoxGeometry(0.1, 0.8, 0.1);
-         const mastilMat = new THREE.MeshStandardMaterial({ color: 0xd9534f });
-         const mastil = new THREE.Mesh(mastilGeo, mastilMat);
-         mastil.position.set(0.6, 0.7, 0);
-         roverMesh.add(mastil);
-
-         scene.add(roverMesh);
-*/
-
         // Manejar reajuste de la ventana de forma fluida
         window.addEventListener("resize", () => {
           const width = contenedor3D.clientWidth;
@@ -491,14 +457,11 @@
         animate();
       }
 
-      // Asegurar que el cargador inicie el renderizado del Canvas 3D
-      window.addEventListener("load", () => {
-        inicializarVisualizador3D();
-        if (simularActivo) {
-          loopSimulacion();
-        }
-      }); // Fin GY-87
-    </script>
+     // Asegurar que el cargador inicie el renderizado del Canvas 3D
+     window.addEventListener("load", () => {
+         inicializarVisualizador3D();
+     }); // Fin GY-87
+   </script> 
 
     <script>
       let teclaPresionada = false;
@@ -555,8 +518,5 @@
         conectarCamara("cam2", "http://192.168.50.1:8889/cam2/whep");
       });
     </script>
-    {% if pagina in ['home', 'snackRun'] %}
-    <script src="{{ url_for('static', filename='snackrun-listeners.js') }}"></script>
-    {% endif %}
   </body>
 </html>
