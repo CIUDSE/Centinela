@@ -69,9 +69,9 @@ h4 {
    TOPBAR
 ───────────────────────────────────────── */
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -83,6 +83,7 @@ h4 {
   letter-spacing: 0.12em;
   color: var(--accent);
   text-transform: uppercase;
+  justify-self: start;
 }
 
 .topbar__status {
@@ -91,6 +92,7 @@ h4 {
   gap: 7px;
   font-size: 0.8rem;
   color: var(--text-muted);
+  justify-self: end;
 }
 
 .dot {
@@ -106,6 +108,44 @@ h4 {
 .dot--red {
   background: var(--red);
   box-shadow: 0 0 6px var(--red);
+}
+
+/* ─────────────────────────────────────────
+   TOPBAR NAV
+───────────────────────────────────────── */
+
+.topbar__nav {
+  justify-self: center;
+  display: flex;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.topbar__nav-btn {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: 6px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.topbar__nav-btn:hover {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+.topbar__nav-btn--activo {
+  background: var(--accent);
+  color: #001622;
 }
 
 /* ─────────────────────────────────────────
@@ -627,49 +667,6 @@ video {
 }
 
 /* ─────────────────────────────────────────
-   RESPONSIVE BREAKPOINTS
-───────────────────────────────────────── */
-
-/* Tablet (≤ 900px): stack panels to 1 column */
-@media (max-width: 900px) {
-  .panel {
-    flex: 1 1 100%;
-  }
-  .camaras-grid {
-    flex-wrap: nowrap; /* keep cameras side by side on tablet */
-  }
-}
-
-/* Mobile (≤ 600px): cameras stack too */
-@media (max-width: 600px) {
-  :root {
-    --panel-pad: 14px;
-    --gap: 10px;
-  }
-
-  .topbar__logo {
-    font-size: 0.8rem;
-  }
-
-  .camaras-grid {
-    flex-direction: column;
-  }
-
-  .camara {
-    flex: 1 1 100%;
-  }
-
-  .controles-modos {
-    flex-direction: column;
-  }
-
-  .btn--modo {
-    flex: none;
-    width: 100%;
-  }
-}
-
-/* ─────────────────────────────────────────
   3D VISUALIZER (Color de fondo)
 ───────────────────────────────────────── */
 /* Adaptación de clases del GY-87 para la hoja de estilos nativa del Rover */
@@ -875,4 +872,64 @@ video {
   border: none;
   display: block;
   background: #000;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE BREAKPOINTS
+───────────────────────────────────────── */
+
+/* Tablet (≤ 900px): stack panels to 1 column */
+@media (max-width: 900px) {
+  .panel {
+    flex: 1 1 100%;
+  }
+  .camaras-grid {
+    flex-wrap: nowrap; /* keep cameras side by side on tablet */
+  }
+}
+
+/* Mobile (≤ 600px): cameras stack too */
+@media (max-width: 600px) {
+  :root {
+    --panel-pad: 14px;
+    --gap: 10px;
+  }
+
+  .topbar__logo {
+    font-size: 0.8rem;
+  }
+
+  .camaras-grid {
+    flex-direction: column;
+  }
+
+  .camara {
+    flex: 1 1 100%;
+  }
+
+  .controles-modos {
+    flex-direction: column;
+  }
+
+  .btn--modo {
+    flex: none;
+    width: 100%;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .topbar__logo,
+  .topbar__status,
+  .topbar__nav {
+    justify-self: center;
+  }
+
+  .topbar__nav {
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }

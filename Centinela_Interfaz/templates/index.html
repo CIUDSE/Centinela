@@ -37,6 +37,28 @@
   <body>
     <header class="topbar">
       <span class="topbar__logo">⬡ CIRC ROVER</span>
+
+      <nav class="topbar__nav">
+        <a
+          href="/"
+          class="topbar__nav-btn {{ 'topbar__nav-btn--activo' if pagina == 'home' else '' }}"
+        >
+          Home
+        </a>
+        <a
+          href="/snackRun"
+          class="topbar__nav-btn {{ 'topbar__nav-btn--activo' if pagina == 'snackRun' else '' }}"
+        >
+          Snack Run
+        </a>
+        <a
+          href="/heist"
+          class="topbar__nav-btn {{ 'topbar__nav-btn--activo' if pagina == 'heist' else '' }}"
+        >
+          Heist
+        </a>
+      </nav>
+
       <span class="topbar__status">
         <span id="status-dot" class="dot dot--green"></span>
         <span id="status-texto">Sistema activo</span>
