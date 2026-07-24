@@ -298,50 +298,25 @@
         </div>
       </section>
 
-      {% if pagina in ['home', 'heist'] %} {% include
-      'partials/panel_cables.html' %} {% endif %}
+      <!-- PANEL 6 — Heist Mission: Panel Cables -->
+      <!-- prettier-ignore -->
+      {% if pagina in ['home', 'heist'] %}
+        {% include 'partials/panel_cables.html' %} 
+      {% endif %}
 
       <!-- PANEL 7 — Heist Mission: Telegrafo Morse -->
-      <section class="panel panel--morse">
-        <h2 class="panel__title">⚙️ Heist Mission — Telegrafo Morse</h2>
-        <p class="instruccion">
-          Ingresa el codigo de la boveda y presiona Enviar.<br />
-          <small
-            >El rover pulsara el boton en codigo Morse automaticamente.</small
-          >
-        </p>
-        <div class="cables__input-group">
-          <input
-            type="text"
-            id="morse-input"
-            class="cables__input"
-            placeholder="Ej: ABC123"
-          />
-          <button class="btn btn--analizar" onclick="enviarMorse()">
-            Enviar
-          </button>
-        </div>
-        <div id="morse-traduccion" class="cables__resultado oculto">
-          <span class="cables__resultado-label">Cadena Morse</span>
-          <span
-            id="morse-cadena"
-            style="
-              font-family: monospace;
-              font-size: 0.85rem;
-              word-break: break-all;
-            "
-          ></span>
-        </div>
-        <div id="morse-error" class="error-box oculto"></div>
-      </section>
+      <!-- prettier-ignore -->
+      {% if pagina in ['home', 'heist'] %} 
+        {% include 'partials/panel_morse.html' %} 
+      {% endif %}
 
-      <!-- PANEL 8 — ERROR 2: SNACK RUN -->
+      <!-- PANEL 8 — Snack Run: Error 2 -->
       <!-- prettier-ignore -->
       {% if pagina in ['home', 'snackRun'] %} 
         {% include 'partials/panel_error2_snackrun.html' %} 
       {% endif %}
 
-      <!-- PANEL 9 — ERROR 2: SNACK RUN -->
+      <!-- PANEL 9 — TERMINAL SSH -->
       <!-- prettier-ignore -->
       {% if pagina in ['home', 'heist'] %} 
         {% include 'partials/panel_ssh.html' %} 
