@@ -1,15 +1,14 @@
 # CORRE EN LA LAPTOP (ESTACIÓN TERRENA)
-from openpyxl import Workbook
-from datetime import datetime
 from tareas.heist_mission.calculadora_cables import CalculadoraCables
+from tareas.mision_gps.mision_gps import MisionGPS
 import socket
 import sys
 import os
 import serial
 import threading
 
-from pathlib import Path
 from flask import Flask, render_template, request, jsonify
+
 
 # Librerias para gy-87
 import serial.tools.list_ports
@@ -21,7 +20,6 @@ datos_telemetria = {
     "pitch": 0.0, "roll": 0.0, "yaw": 0.0,
     "lat": 32.514, "lng": -117.038
 }
-
 
 app = Flask(__name__)
 
@@ -35,9 +33,7 @@ sock_enviador = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 EMERGENCIA_ACTIVA = False
 
 calculadora: CalculadoraCables = CalculadoraCables()
-
-MISSION_RECORDING = False
-MISSION_LOG = []
+mision_gps: MisionGPS = MisionGPS()
 
 PUERTO_MORSE = 5005
 
@@ -185,8 +181,6 @@ def obtener_imu():
     return jsonify(datos_telemetria)
 
 # API Única para la Estación Terrena --- Para el mapa
-
-
 @app.route('/api/telemetria', methods=['GET'])
 def obtener_telemetria():
     return datos_telemetria
@@ -196,70 +190,40 @@ def obtener_telemetria():
 @app.route("/api/mission/start", methods=["POST"])
 def mission_start():
 
-    global MISSION_RECORDING
-    global MISSION_LOG
-
-    MISSION_RECORDING = True
-    MISSION_LOG = []
-
-    print("[MISSION] Recording started.")
+    mision_gps.start()
 
     return jsonify({"status": "success"})
-
 
 @app.route("/api/mission/stop", methods=["POST"])
 def mission_stop():
 
-    global MISSION_RECORDING
-    save_mission_to_excel()
-    MISSION_RECORDING = False
-
-    print("[MISSION] Recording stopped.")
+    mision_gps.stop()
 
     return jsonify({"status": "success"})
-
 
 @app.route("/api/mission/point", methods=["POST"])
 def mission_point():
 
-    global MISSION_LOG
-
-    if not MISSION_RECORDING:
-        return jsonify({"status": "ignored"})
-
     data = request.get_json()
 
-    MISSION_LOG.append({
-        "Tiempo": datetime.now().strftime("%H:%M:%S"),
-        "Latitud": data["latitude"],
-        "Longitud": data["longitude"],
-        "Tipo": "Ruta"
-    })
+    mision_gps.add_route_point(
+        data["latitude"],
+        data["longitude"]
+    )
 
     return jsonify({"status": "success"})
-
 
 @app.route("/api/mission/waypoint", methods=["POST"])
 def mission_waypoint():
 
-    global MISSION_LOG
-
-    if not MISSION_RECORDING:
-        return jsonify({"status": "ignored"})
-
     data = request.get_json()
 
-    MISSION_LOG.append({
-
-        "Tiempo": datetime.now().strftime("%H:%M:%S"),
-        "Latitud": data["latitude"],
-        "Longitud": data["longitude"],
-        "Tipo": "Waypoint"
-
-    })
+    mision_gps.add_waypoint(
+        data["latitude"],
+        data["longitude"]
+    )
 
     return jsonify({"status": "success"})
-
 
 @app.route('/api/morse', methods=['POST'])
 def enviar_morse():
@@ -298,43 +262,6 @@ def enviar_morse():
         return jsonify({"status": "success", "cadena_morse": cadena_morse}), 200
     except Exception as e:
         return jsonify({"status": "error", "mensaje": str(e)}), 500
-
-
-def save_mission_to_excel():
-
-    # Create the "missions" folder if it doesn't exist
-    missions_folder = Path("missions")
-    missions_folder.mkdir(exist_ok=True)
-
-    # Create the workbook
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Mission"
-
-    # Column headers
-    ws.append([
-        "Tiempo",
-        "Latitud",
-        "Longitud",
-        "Tipo"
-    ])
-
-    # Write mission data
-    for row in MISSION_LOG:
-        ws.append([
-            row["Tiempo"],
-            row["Latitud"],
-            row["Longitud"],
-            row["Tipo"]
-        ])
-
-    # Save inside the missions folder
-    filename = missions_folder / f"Mission_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
-
-    wb.save(filename)
-
-    print(f"[MISSION] Mission saved to {filename}")
-
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
