@@ -1,61 +1,27 @@
 # CORRE EN LA LAPTOP (ESTACIÓN TERRENA)
+from tareas.heist_mission.calculadora_cables import CalculadoraCables
+from tareas.mision_gps.mision_gps import MisionGPS
 import socket
 import sys
 import os
 import serial
 import threading
 
-from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 
-from tareas.heist_mission.calculadora_cables import CalculadoraCables
-from datetime import datetime
-from openpyxl import Workbook
+
+# Librerias para gy-87
+import serial.tools.list_ports
+
+from icecream import ic
+
+# Objeto central unificado de telemetría
+datos_telemetria = {
+    "pitch": 0.0, "roll": 0.0, "yaw": 0.0,
+    "lat": 32.514, "lng": -117.038
+}
 
 app = Flask(__name__)
-
-SERIAL_PORT = "COM5"      # Change to your COM port
-BAUDRATE = 115200         # Must match Serial.begin()
-
-latest_telemetry = {
-    "latitude": 0,
-    "longitude": 0,
-    "altitude": 0,
-}
-def serial_reader():
-
-    global latest_telemetry
-
-    try:
-
-        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
-
-        print(f"[SERIAL] Connected to {SERIAL_PORT}")
-
-        while True:
-
-            line = ser.readline().decode("utf-8").strip()
-
-            if not line:
-                continue
-
-            try:
-
-                parts = line.split(",")
-
-                latest_telemetry["latitude"] = float(parts[0])
-                latest_telemetry["longitude"] = float(parts[1])
-                latest_telemetry["altitude"] = float(parts[2])
-
-                print(latest_telemetry)
-
-            except Exception:
-
-                print(f"[SERIAL] Invalid packet: {line}")
-
-    except Exception as e:
-
-        print(f"[SERIAL ERROR] {e}")
 
 IP_RASPBERRY = "192.168.1.50"  # Se utilizará RSTP
 PUERTO_LUCES = 5006
@@ -67,14 +33,42 @@ sock_enviador = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 EMERGENCIA_ACTIVA = False
 
 calculadora: CalculadoraCables = CalculadoraCables()
+mision_gps: MisionGPS = MisionGPS()
 
-MISSION_RECORDING = False
-MISSION_LOG = []
+PUERTO_MORSE = 5005
+
+DICCIONARIO_MORSE = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----',
+    '.': '.-.-.-', ',': '--..--', ':': '---...', '?': '..--..',
+    "'": '.----.', '-': '-....-', '/': '-..-.', '(': '-.--.',
+    ')': '-.--.-', '"': '.-..-.', '=': '-...-', '+': '.-.-.', '@': '.--.-.'
+}
+
+# -------- RUTEO DE PAGINAS --------
+
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', pagina='home')
 
+
+@app.route('/heist')
+def heist():
+    return render_template('index.html', pagina='heist')
+
+
+@app.route('/snackRun')
+def snack_run():
+    return render_template('index.html', pagina='snackRun')
+
+
+# -------- FIN DE RUTEO DE PAGINAS --------
 
 @app.route('/api/emergencia', methods=['POST'])
 def gestionar_emergencia():
@@ -154,11 +148,7 @@ def analizar_cables():
         return jsonify({"status": "error", "mensaje": str(e)}), 400
     except Exception as e:
         return jsonify({"status": "error", "mensaje": f"Error inesperado: {e}"}), 500
-    
-@app.route("/api/telemetry/latest")
-def telemetry():
 
-    return jsonify(latest_telemetry)
 
 @app.route('/api/solenoide', methods=['POST'])
 def controlar_solenoide():
@@ -175,118 +165,103 @@ def controlar_solenoide():
     if comando == 'PULSO_RAPIDO':
         try:
             # Reutiliza el sock_enviador para lanzar el paquete UDP al puerto 5007 de la Raspi
-            sock_enviador.sendto(b"PULSO_RAPIDO", (IP_RASPBERRY, PUERTO_SOLENOIDE))
-            print(f"[WEB] ¡PULSO_RAPIDO enviado al Solenoide! ({IP_RASPBERRY}:{PUERTO_SOLENOIDE})")
+            sock_enviador.sendto(
+                b"PULSO_RAPIDO", (IP_RASPBERRY, PUERTO_SOLENOIDE))
+            print(
+                f"[WEB] ¡PULSO_RAPIDO enviado al Solenoide! ({IP_RASPBERRY}:{PUERTO_SOLENOIDE})")
             return jsonify({"status": "success", "mensaje": "Pulso enviado de forma segura"}), 200
         except Exception as e:
             return jsonify({"status": "error", "mensaje": f"Error de red UDP: {e}"}), 500
 
     return jsonify({"status": "error", "mensaje": "Comando de solenoide desconocido"}), 400
 
+
+@app.route('/api/imu', methods=['GET'])
+def obtener_imu():
+    return jsonify(datos_telemetria)
+
+# API Única para la Estación Terrena --- Para el mapa
+@app.route('/api/telemetria', methods=['GET'])
+def obtener_telemetria():
+    return datos_telemetria
+
+
 # Almacenamiento de coordenadas
 @app.route("/api/mission/start", methods=["POST"])
 def mission_start():
 
-    global MISSION_RECORDING
-    global MISSION_LOG
-
-    MISSION_RECORDING = True
-    MISSION_LOG = []
-
-    print("[MISSION] Recording started.")
+    mision_gps.start()
 
     return jsonify({"status": "success"})
 
 @app.route("/api/mission/stop", methods=["POST"])
 def mission_stop():
 
-    global MISSION_RECORDING
-
-    save_mission_to_excel()
-
-    MISSION_RECORDING = False
-
-    print("[MISSION] Recording stopped.")
+    mision_gps.stop()
 
     return jsonify({"status": "success"})
 
 @app.route("/api/mission/point", methods=["POST"])
 def mission_point():
 
-    global MISSION_LOG
-
-    if not MISSION_RECORDING:
-        return jsonify({"status": "ignored"})
-
     data = request.get_json()
 
-    MISSION_LOG.append({
-        "Tiempo": datetime.now().strftime("%H:%M:%S"),
-        "Latitud": data["latitude"],
-        "Longitud": data["longitude"],
-        "Tipo": "Ruta"
-    })
+    mision_gps.add_route_point(
+        data["latitude"],
+        data["longitude"]
+    )
 
     return jsonify({"status": "success"})
 
 @app.route("/api/mission/waypoint", methods=["POST"])
 def mission_waypoint():
 
-    global MISSION_LOG
-
-    if not MISSION_RECORDING:
-        return jsonify({"status": "ignored"})
-
     data = request.get_json()
 
-    MISSION_LOG.append({
-
-        "Tiempo": datetime.now().strftime("%H:%M:%S"),
-
-        "Latitud": data["latitude"],
-
-        "Longitud": data["longitude"],
-
-        "Tipo": "Waypoint"
-
-    })
+    mision_gps.add_waypoint(
+        data["latitude"],
+        data["longitude"]
+    )
 
     return jsonify({"status": "success"})
 
-def save_mission_to_excel():
+@app.route('/api/morse', methods=['POST'])
+def enviar_morse():
+    if EMERGENCIA_ACTIVA:
+        return jsonify({"status": "blocked", "mensaje": "E-STOP activo."}), 403
 
-    # Create the "missions" folder if it doesn't exist
-    missions_folder = Path("missions")
-    missions_folder.mkdir(exist_ok=True)
+    data = request.get_json()
+    codigo = data.get('codigo', '').strip().upper()
 
-    # Create the workbook
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Mission"
+    if not codigo:
+        return jsonify({"status": "error", "mensaje": "Codigo vacio."}), 400
 
-    # Column headers
-    ws.append([
-        "Tiempo",
-        "Latitud",
-        "Longitud",
-        "Tipo"
-    ])
+    palabras = codigo.split(' ')
+    frase_traducida = []
+    caracteres_invalidos = []
 
-    # Write mission data
-    for row in MISSION_LOG:
-        ws.append([
-            row["Tiempo"],
-            row["Latitud"],
-            row["Longitud"],
-            row["Tipo"]
-        ])
+    for palabra in palabras:
+        letras = []
+        for c in palabra:
+            if c in DICCIONARIO_MORSE:
+                letras.append(DICCIONARIO_MORSE[c])
+            else:
+                caracteres_invalidos.append(c)
+        if letras:
+            frase_traducida.append(' '.join(letras))
 
-    # Save inside the missions folder
-    filename = missions_folder / f"Mission_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
+    if caracteres_invalidos:
+        return jsonify({"status": "error", "mensaje": f"Caracteres no validos: {caracteres_invalidos}"}), 400
 
-    wb.save(filename)
+    cadena_morse = '   '.join(frase_traducida)
 
-    print(f"[MISSION] Mission saved to {filename}")
+    try:
+        sock_enviador.sendto(cadena_morse.encode('utf-8'),
+                             (IP_RASPBERRY, PUERTO_MORSE))
+        print(f"[MORSE] Enviado: {cadena_morse}")
+        return jsonify({"status": "success", "cadena_morse": cadena_morse}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "mensaje": str(e)}), 500
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
@@ -294,13 +269,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         IP_RASPBERRY = sys.argv[1]
 
-    threading.Thread(
-        target=serial_reader,
-        daemon=True
-    ).start()
-
     print(
         f"Interfaz iniciada. Los comandos de luces se enviarán a la Raspberry en: {IP_RASPBERRY}:{PUERTO_LUCES}")
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-

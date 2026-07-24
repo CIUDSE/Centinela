@@ -69,9 +69,9 @@ h4 {
    TOPBAR
 ───────────────────────────────────────── */
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 10px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -83,6 +83,7 @@ h4 {
   letter-spacing: 0.12em;
   color: var(--accent);
   text-transform: uppercase;
+  justify-self: start;
 }
 
 .topbar__status {
@@ -91,6 +92,7 @@ h4 {
   gap: 7px;
   font-size: 0.8rem;
   color: var(--text-muted);
+  justify-self: end;
 }
 
 .dot {
@@ -106,6 +108,44 @@ h4 {
 .dot--red {
   background: var(--red);
   box-shadow: 0 0 6px var(--red);
+}
+
+/* ─────────────────────────────────────────
+   TOPBAR NAV
+───────────────────────────────────────── */
+
+.topbar__nav {
+  justify-self: center;
+  display: flex;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.topbar__nav-btn {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: 6px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.topbar__nav-btn:hover {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+.topbar__nav-btn--activo {
+  background: var(--accent);
+  color: #001622;
 }
 
 /* ─────────────────────────────────────────
@@ -627,6 +667,214 @@ video {
 }
 
 /* ─────────────────────────────────────────
+  3D VISUALIZER (Color de fondo)
+───────────────────────────────────────── */
+/* Adaptación de clases del GY-87 para la hoja de estilos nativa del Rover */
+.panel--imu {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  grid-column: span 1;
+}
+.imu-panel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+.imu-datos-num {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.imu-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+.imu-card__label {
+  font-size: 0.7rem;
+  color: #777;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+}
+.imu-card__val {
+  font-family: monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #00b4d8;
+}
+.canvas-3d-wrapper {
+  flex-grow: 1;
+  min-height: 250px;
+  background: #05070c;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+.canvas-3d-instructions {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 0.65rem;
+  color: #555;
+  pointer-events: none;
+}
+
+/* Punto indicador base con efecto brillante */
+.dot-glow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+/* Estado ROJO (Desconectado / Off) */
+.dot-glow--red {
+  background-color: #ff4d4d;
+  box-shadow:
+    0 0 8px #ff4d4d,
+    0 0 12px rgba(255, 77, 77, 0.6);
+}
+
+/* Estado VERDE (Conectado / Activo) */
+.dot-glow--green {
+  background-color: #2ecc71;
+  box-shadow:
+    0 0 8px #2ecc71,
+    0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+/* ─────────────────────────────────────────
+   (IMU & GNSS)
+───────────────────────────────────────── */
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.panel__header .panel__title {
+  margin: 0;
+  border-bottom: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+/* Indicador de estado con punto resplandeciente */
+.status-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9aa0a6;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.dot-glow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.dot-glow--red {
+  background-color: #ff4d4d;
+  box-shadow:
+    0 0 8px #ff4d4d,
+    0 0 12px rgba(255, 77, 77, 0.6);
+}
+
+.dot-glow--green {
+  background-color: #2ecc71;
+  box-shadow:
+    0 0 8px #2ecc71,
+    0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+/* ─────────────────────────────────────────
+   RECUADRO DE CONTROLES SUPERIOR (COMPACTO)
+───────────────────────────────────────── */
+.panel-controles-box,
+.imu-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+}
+
+/* Ajuste para evitar que el botón "Agregar Waypoint" se estire al 100% */
+.panel-controles-box .btn,
+.panel-controles-box #addWaypointBtn,
+.panel-controles-box .btn-waypoint {
+  width: auto !important;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  margin-bottom: 0 !important; /* Quita el margen inferior predeterminado */
+}
+
+/* Checkbox con letra pequeña y en una sola línea sin desbordar */
+.control-checkbox,
+.imu-controles label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c5c6c7;
+  font-size: 0.75rem; /* Tamaño reducido */
+  white-space: nowrap; /* Evita el salto de línea */
+  cursor: pointer;
+  user-select: none;
+}
+
+.control-checkbox input[type="checkbox"],
+.imu-controles input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: #00b4d8;
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────
+   PANEL — TERMINAL SSH (Wetty)
+───────────────────────────────────────── */
+.panel--terminal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.terminal-frame-wrapper {
+  flex: 1;
+  min-height: 400px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.terminal-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border: none;
+  display: block;
+  background: #000;
+}
+
+/* ─────────────────────────────────────────
    RESPONSIVE BREAKPOINTS
 ───────────────────────────────────────── */
 
@@ -666,5 +914,22 @@ video {
   .btn--modo {
     flex: none;
     width: 100%;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .topbar__logo,
+  .topbar__status,
+  .topbar__nav {
+    justify-self: center;
+  }
+
+  .topbar__nav {
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
