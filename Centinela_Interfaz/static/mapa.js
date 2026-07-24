@@ -259,4 +259,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 .catch(() => {});
         }
     }, 500);
-});
+    // ==========================================
+    // Guardar misión al cerrar la página
+    // ==========================================
+  window.addEventListener("beforeunload", () => {
+
+    navigator.sendBeacon("/api/mission/stop");
+
+    });
+
+    });
