@@ -1,0 +1,66 @@
+<!-- ═════════════════════════════════════════
+     PANEL — TERMINAL SSH (Wetty)
+
+     SETUP en una laptop/servidor nueva antes de usar este panel
+     (sin Docker — instalación directa):
+
+     1. Instalar Node.js v16+ si no está instalado:
+          node -v
+
+     2. Instalar Wetty de forma global:
+          npm install -g wetty
+
+     3. (Recomendado) Instalar pm2 para que Wetty siga corriendo
+        aunque se cierre la terminal:
+          npm install -g pm2
+
+     4. Levantar Wetty apuntando al host SSH destino
+        (ej. la Raspberry Pi del rover):
+          pm2 start wetty -- --port 3000 --ssh-host [ip_de_raspberry]
+          pm2 save
+
+        — o para pruebas rápidas, sin pm2:
+          wetty --port 3000 --ssh-host [ip_de_raspberry]
+
+     5. Confirmar que responde en http://localhost:3000
+        (debe mostrar la pantalla de login SSH de Wetty).
+
+     El iframe de abajo asume Wetty en localhost:3000. Si Wetty corre
+     en otra máquina, reemplaza localhost por su IP dentro de la red
+     interna — NUNCA expongas el puerto 3000 directo a internet.
+═════════════════════════════════════════ -->
+<section class="panel panel--terminal">
+  <div class="panel__header">
+    <h2 class="panel__title">🖥️ Terminal SSH</h2>
+    <span class="status-clean">
+      <span class="dot-glow dot-glow--red" id="terminalStatusDot"></span>
+      <span id="terminalStatusText">Wetty desconectado</span>
+    </span>
+  </div>
+
+  <p class="instruccion">
+    Terminal remota embebida vía SSH (Wetty). Requiere que el servicio Wetty
+    esté corriendo en el servidor antes de cargar este panel.
+  </p>
+
+  <div class="terminal-frame-wrapper">
+    <iframe
+      id="terminalFrame"
+      class="terminal-frame"
+      src="http://localhost:3000"
+      title="Terminal SSH"
+      allow="clipboard-read; clipboard-write"
+      onload="
+        document
+          .getElementById('terminalStatusDot')
+          .classList.replace('dot-glow--red', 'dot-glow--green');
+        document.getElementById('terminalStatusText').textContent =
+          'Wetty conectado';
+      "
+      onerror="
+        document.getElementById('terminalStatusText').textContent =
+          'No se pudo cargar Wetty'
+      "
+    ></iframe>
+  </div>
+</section>

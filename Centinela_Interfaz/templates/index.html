@@ -335,9 +335,17 @@
         <div id="morse-error" class="error-box oculto"></div>
       </section>
 
-      <!-- PANEL 7 — ERROR 2: SNACK RUN -->
-      {% if pagina in ['home', 'snackRun'] %} {% include
-      'partials/panel_error2_snackrun.html' %} {% endif %}
+      <!-- PANEL 8 — ERROR 2: SNACK RUN -->
+      <!-- prettier-ignore -->
+      {% if pagina in ['home', 'snackRun'] %} 
+        {% include 'partials/panel_error2_snackrun.html' %} 
+      {% endif %}
+
+      <!-- PANEL 9 — ERROR 2: SNACK RUN -->
+      <!-- prettier-ignore -->
+      {% if pagina in ['home', 'heist'] %} 
+        {% include 'partials/panel_ssh.html' %} 
+      {% endif %}
     </main>
 
     <script>

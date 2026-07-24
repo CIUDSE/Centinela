@@ -81,9 +81,3 @@ python3 tareas/heist_mission/apagador_de_luces/apagador_luces.py
 # en otra terminal:
 python3 app.py 127.0.0.1
 ```
-
-## Troubleshooting rápido
-
-- **`python3: command not found`** → instalar Python 3.12.6 desde [python.org](https://www.python.org/downloads/) o con `pyenv`.
-- **Error de conexión en modo real** → verificar que la laptop y la Raspberry Pi estén en la misma red y que la IP usada sea correcta (`ping [ip_de_raspberry]`).
-- **Puerto ocupado al correr `app.py`** → cerrar procesos previos de Flask o cambiar el puerto en `app.py`.
