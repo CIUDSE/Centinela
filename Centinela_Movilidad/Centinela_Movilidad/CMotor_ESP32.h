@@ -14,6 +14,25 @@ Clase de motor desarrollada especificamente para esp32 y driver de motores MDD10
 #ifndef MOTOR_H // if para que el archivo de cabecera (.h) solo se incluya una vez, incluso si es llamado varias veces por diferentes archivos del proyecto.
 #define MOTOR_H 
 
+#define ESP32_I2C_SLAVE_ADDR_BRAZO 0x08  // Direccion I2C del ESP32 esclavo del brazo
+
+#ifndef PINES_MASTER_H
+#define PINES_MASTER_H
+
+// CRSF (ExpressLRS)
+#define PIN_CRSF_RX   16
+#define PIN_CRSF_TX   17
+
+// I2C hacia el esclavo del brazo
+#define PIN_I2C_SDA   21
+#define PIN_I2C_SCL   22
+#define I2C_SLAVE_ADDR_BRAZO  0x08
+
+// Umbral de switches
+#define UMBRAL_SWITCH  1500
+
+#endif
+
 //Declaracion de pines a utilizar de la esp 32. Consideracion de Esp32 Wroom 32 de 38 pines.
 #ifdef MDD10A_ESP32
   #define FL_DIR 4 // Front Left Motor DIR pin. DIR 1
