@@ -142,50 +142,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // AGREGAR WAYPOINT
   if (waypointButton) {
+
     waypointButton.addEventListener("click", () => {
-      const ahora = Date.now();
-      const nombreWp = `Waypoint ${waypointCount}`;
 
-      const waypoint = {
-        lat: latitude,
-        lon: longitude,
+        addWaypoint(latitude, longitude);
+
+    });
+
+}
+const manualButton = document.getElementById("manualWaypointBtn");
+
+if (manualButton) {
+
+    manualButton.addEventListener("click", () => {
+
+        const lat = parseFloat(document.getElementById("manualLat").value);
+        const lon = parseFloat(document.getElementById("manualLon").value);
+
+        if (isNaN(lat) || isNaN(lon)) {
+
+            alert("Ingrese coordenadas válidas");
+            return;
+
+        }
+
+        addWaypoint(lat, lon);
+
+        document.getElementById("manualLat").value = "";
+        document.getElementById("manualLon").value = "";
+
+    });
+
+}
+function addWaypoint(lat, lon) {
+
+    const ahora = Date.now();
+    const nombreWp = `Waypoint ${waypointCount}`;
+
+    const waypoint = {
+        lat: lat,
+        lon: lon,
         timestamp: ahora,
-      };
+    };
 
-      waypoints.push(waypoint);
+    waypoints.push(waypoint);
 
-      eventosRuta.push({
+    eventosRuta.push({
         tipo: "Waypoint",
         nombre: nombreWp,
-        lat: latitude,
-        lng: longitude,
+        lat: lat,
+        lng: lon,
         timestamp: ahora,
-      });
-
-      const waypointMarker = L.marker([waypoint.lat, waypoint.lon]).addTo(map)
-        .bindPopup(`
-                    <b>${nombreWp}</b><br>
-                    Latitude: ${waypoint.lat.toFixed(6)}<br>
-                    Longitude: ${waypoint.lon.toFixed(6)}
-                `);
-
-      waypointMarkers.push(waypointMarker);
-
-      if (recordingRoute) {
-        fetch("/api/mission/waypoint", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            latitude: waypoint.lat,
-            longitude: waypoint.lon,
-          }),
-        }).catch(() => {});
-      }
-
-      waypointCount++;
     });
-  }
 
+    const waypointMarker = L.marker([lat, lon]).addTo(map)
+        .bindPopup(`
+            <b>${nombreWp}</b><br>
+            Latitude: ${lat.toFixed(6)}<br>
+            Longitude: ${lon.toFixed(6)}
+        `);
+
+    waypointMarkers.push(waypointMarker);
+
+    if (recordingRoute) {
+
+        fetch("/api/mission/waypoint", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                latitude: lat,
+                longitude: lon,
+            }),
+        }).catch(() => {});
+    }
+
+    waypointCount++;
+}
   // =========================================================
   // 📍 FUNCIÓN REUTILIZABLE PARA ACTUALIZAR LA POSICIÓN ROVER
   // =========================================================
