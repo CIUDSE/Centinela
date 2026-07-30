@@ -79,7 +79,12 @@ typedef struct telemetryData
   float rotX = 0.0;         //Valores en °/s
   float rotY = 0.0;
   float rotZ = 0.0;
-  
+
+  // Nuevos datos de orientación (Filtro Complementario)
+  float pitch = 0.0;
+  float roll = 0.0;
+  float yaw = 0.0;
+
   //Datos GPS1 (GPS integrado en placa T-Beam)
   double lat1 = -1.0;
   double lon1 = -1.0;
@@ -116,6 +121,7 @@ void enviarDatos();
 
 //Funciones GY87
 void inicializarGY87();
+void calibrarGY87(); //Calibración de giroscopio y acelerómetro
 void leerAcelerometro();
 void leerGiroscopio();
 void processGyroData();

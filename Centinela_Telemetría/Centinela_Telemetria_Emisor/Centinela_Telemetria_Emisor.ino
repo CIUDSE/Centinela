@@ -24,6 +24,10 @@ telemetryData -> {accelX, accelY, accelZ, rotX, rotY, rotZ, lat1, lon1, lat2, lo
 
 telemetryData_t telemetryData;
 
+// Variable para control de tiempo no bloqueante (reemplaza al delay)
+unsigned long ultimoEnvio = 0;
+const unsigned long intervaloEnvio = 500; // Tiempo en ms (mismo tiempo de prueba original)
+
 void setup() 
 {
   //pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion(); //Inicializa buzzer
@@ -32,6 +36,7 @@ void setup()
   Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
   inicializarGY87();    //Inicializa I2C automaticamente.
+  calibrarGY87();       //Calibración de la IMU al encender
   inicializarDS18B20(); //Inicializa los sensores de temperatura.
   inicializarGPS1();    //Inicializa GPS1 (GPS integrado en T-Beam)
   inicializarGPS2();     //Inicializa GPS2 (GPS Neo6m externo)
@@ -40,17 +45,23 @@ void setup()
 
 void loop() 
 {
+  // Lectura continua de la IMU para alimentar el filtro complementario sin pausas
   leerAcelerometro();
   leerGiroscopio();
-  leerDS18B20();
+
+  // Lectura continua de buffers GPS
   leerGPS1();
   leerGPS2();
-  enviarDatos();
 
+  // Envío por LoRa y sensores lentos cada 500 ms (mismo intervalo original, sin bloquear el flujo)
+  if (millis() - ultimoEnvio >= intervaloEnvio) 
+  {
+    ultimoEnvio = millis();
+
+    leerDS18B20();
+    enviarDatos();
+  }
 
   //recibir control
   //enviar control a esp32
-
-  
-  delay(500); // Espera de 1 segundo antes del próximo envío (el tiempo es solo para prueba)
 }
