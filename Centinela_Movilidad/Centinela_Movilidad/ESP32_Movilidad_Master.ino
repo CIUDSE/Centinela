@@ -4,7 +4,7 @@
 
 #include <CRSFforArduino.hpp>
 #include <Wire.h>
-#include "PINES_MASTER_H"
+
 #include "CMotor_ESP32.h"
 
 CRSFforArduino *crsf = nullptr;
@@ -20,11 +20,11 @@ const uint16_t UMBRAL_SWITCH = 1500;
 struct BrazoCmd {
   uint16_t ch1;
   uint16_t ch2;
-  uint16_t ch4;
+  uint16_t ch3;
   uint8_t  velocidad; // 0 = precisa, 1 = rapida
 };
 
-void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t velocidad) {
+void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint8_t velocidad) {
   BrazoCmd cmd;
   cmd.ch1 = ch1;
   cmd.ch2 = ch2;
@@ -125,9 +125,7 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       if (ch6_velocidad > UMBRAL_SWITCH) {
         Serial.println("Modo: BRAZO, Velocidad: RAPIDA");
 
-        // Aqui va la logica real de control del brazo a velocidad completa
-        // controlarBrazo(ch1, ch2, ch4, 1.0); // factor de velocidad = 100%
-        enviarComandoBrazo(ch1, ch2, ch4, 1); // velocidad = 100%
+        enviarComandoBrazo(ch1, ch2, ch4, 1); // factor de velocidad = 100%
 
       // -------------------------------------------------------------
       // BLOQUE 2.2: Dentro de brazo, velocidad PRECISA (CH6 bajo)
@@ -141,7 +139,7 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
 
         // Aqui va la logica real de control del brazo a velocidad reducida
         // controlarBrazo(ch1, ch2, ch4, 0.3); // factor de velocidad = 30%
-        enviarComandoBrazo(ch1, ch2, ch4, 1); // velocidad = 100%
+        enviarComandoBrazo(ch1, ch2, ch4, 0.3); // factor de velocidad = 30%
       }
     }
 
