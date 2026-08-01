@@ -84,12 +84,12 @@ void loop() {
   if (nuevoComando) {
     nuevoComando = false;
 
-    BrazoCmd cmd = ultimoComando; // copia local
-    float factor = cmd.velocidad ? 1.0 : 0.3;
+    BrazoCmd cmd = ultimoComando;
+    float factor = cmd.velocidad ? 1.0 : 0.3; // factor de velocidad: 1.0 = rapida, 0.3 = precisa
 
     int velArt1 = (map(cmd.ch1, CH_MIN, CH_MAX, -255, 255)) * factor;
     int velArt2 = (map(cmd.ch2, CH_MIN, CH_MAX, -255, 255)) * factor;
-    int velArt3 = (map(cmd.ch3, CH_MIN, CH_MAX, -255, 255)) * factor;
+    int velArt3 = (map(cmd.ch4, CH_MIN, CH_MAX, -255, 255)) * factor;
 
     controlarArticulacion(A1_M1_DIR1, A1_M1_PWM1, A1_M2_DIR2, A1_M2_PWM2, velArt1);
     controlarArticulacion(A2_M1_DIR1, A2_M1_PWM1, A2_M2_DIR2, A2_M2_PWM2, velArt2);

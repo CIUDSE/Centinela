@@ -125,7 +125,7 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       if (ch6_velocidad > UMBRAL_SWITCH) {
         Serial.println("Modo: BRAZO, Velocidad: RAPIDA");
 
-        enviarComandoBrazo(ch1, ch2, ch4, 1); // factor de velocidad = 100%
+        enviarComandoBrazo(ch1, ch2, ch4, 1); // 1 = velocidad rapida de factor 1.0
 
       // -------------------------------------------------------------
       // BLOQUE 2.2: Dentro de brazo, velocidad PRECISA (CH6 bajo)
@@ -138,8 +138,8 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
         Serial.println("Modo: BRAZO, Velocidad: PRECISA");
 
         // Aqui va la logica real de control del brazo a velocidad reducida
-        // controlarBrazo(ch1, ch2, ch4, 0.3); // factor de velocidad = 30%
-        enviarComandoBrazo(ch1, ch2, ch4, 0.3); // factor de velocidad = 30%
+        // controlarBrazo(ch1, ch2, ch4); // factor de velocidad = 30%
+        enviarComandoBrazo(ch1, ch2, ch4, 0); // 0 = velocidad precisa de factor 0.3
       }
     }
 
