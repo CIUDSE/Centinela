@@ -50,9 +50,9 @@ void onReceiveI2C(int numBytes) {
 // arranque inicial)
 // =========================================================
 void detenerTodo() {
-  controlarArticulacion(A1_M1_DIR1, PWM_CANAL_A1_M1, A1_M2_DIR2, PWM_CANAL_A1_M2, 0);
-  controlarArticulacion(A2_M1_DIR1, PWM_CANAL_A2_M1, A2_M2_DIR2, PWM_CANAL_A2_M2, 0);
-  controlarArticulacion(A3_M1_DIR1, PWM_CANAL_A3_M1, A3_M2_DIR2, PWM_CANAL_A3_M2, 0);
+  controlarArticulacion(A1_M1_DIR1, A1_M1_PWM1, A1_M2_DIR2, A1_M2_PWM2, 0);
+  controlarArticulacion(A2_M1_DIR1, A2_M1_PWM1, A2_M2_DIR2, A2_M2_PWM2, 0);
+  controlarArticulacion(A3_M1_DIR1, A3_M1_PWM1, A3_M2_DIR2, A3_M2_PWM2, 0);
 }
 
 void setup() {
