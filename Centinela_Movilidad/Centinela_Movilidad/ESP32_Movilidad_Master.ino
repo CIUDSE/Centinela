@@ -20,15 +20,15 @@ const uint16_t UMBRAL_SWITCH = 1500;
 struct BrazoCmd {
   uint16_t ch1;
   uint16_t ch2;
-  uint16_t ch3;
+  uint16_t ch4;
   uint8_t  velocidad; // 0 = precisa, 1 = rapida
 };
 
-void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint8_t velocidad) {
+void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t velocidad) {
   BrazoCmd cmd;
   cmd.ch1 = ch1;
   cmd.ch2 = ch2;
-  cmd.ch3 = ch3;
+  cmd.ch4 = ch4;
   cmd.velocidad = velocidad;
 
   Wire.beginTransmission(I2C_SLAVE_ADDR_BRAZO);
