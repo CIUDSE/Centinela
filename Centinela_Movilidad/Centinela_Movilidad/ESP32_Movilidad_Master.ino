@@ -150,4 +150,4 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
     Serial.print(" CH5 (modo):"); Serial.print(ch5_modo);
     Serial.print(" CH6 (velocidad):"); Serial.println(ch6_velocidad);
   }
-}git config --global credential.helper
+}
