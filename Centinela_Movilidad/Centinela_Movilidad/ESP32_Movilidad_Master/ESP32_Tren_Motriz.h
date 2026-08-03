@@ -6,8 +6,8 @@
   #define DRIVER_3_TREN_MOTRIZ 32
   #define DRIVER_4_TREN_MOTRIZ 33
 
-  #define DIR_FRONT 25
-  #define DIR_BACK 19
+  #define DIR_LEFT 25
+  #define DIR_RIGHT 19
 
   // Zona muerta de direccion (canal 1), en microsegundos respecto al centro
   #define ZONA_MUERTA_DIR 10

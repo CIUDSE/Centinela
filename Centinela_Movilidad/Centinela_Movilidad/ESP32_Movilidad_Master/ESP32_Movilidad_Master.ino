@@ -54,11 +54,11 @@ void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch3_raw) {
   int ch1_centrado = (int)ch1_raw - UMBRAL_SWITCH;
 
   if (ch1_centrado > ZONA_MUERTA_DIR) {
-    digitalWrite(DIR_FRONT, HIGH);
-    digitalWrite(DIR_BACK, HIGH);
+    digitalWrite(DIR_RIGHT, HIGH);
+    digitalWrite(DIR_LEFT, LOW);
   } else if (ch1_centrado < -ZONA_MUERTA_DIR) {
-    digitalWrite(DIR_FRONT, LOW);
-    digitalWrite(DIR_BACK, LOW);
+    digitalWrite(DIR_RIGHT, LOW);
+    digitalWrite(DIR_LEFT, HIGH);
   }
 
   int potencia = map(ch3_raw, CH_MIN, CH_MAX, 0, 255);
@@ -165,7 +165,6 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       // Movimiento lento y controlado del brazo, para tareas
       // que requieren precision como tomar una muestra u objeto.
       // -------------------------------------------------------------
-
 
       } else {
         Serial.println("Modo: BRAZO, Velocidad: PRECISA");
