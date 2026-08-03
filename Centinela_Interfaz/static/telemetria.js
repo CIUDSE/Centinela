@@ -107,6 +107,8 @@ function parsearTramaLoRa(linea) {
 // ===========================================================================
 // 2. Guardar el objeto y refrescar la interfaz cada vez que llega una trama
 // ===========================================================================
+let acumuladorYaw = 0; // Variable acumuladora par integrar en el giroscopio
+
 function actualizarTelemetria(telemetria) {
   // Guardamos la trama más reciente en el objeto global
   window.telemetriaActual = telemetria;
@@ -117,6 +119,48 @@ function actualizarTelemetria(telemetria) {
   document.dispatchEvent(
     new CustomEvent("telemetria-actualizada", { detail: telemetria }),
   );
+
+  // -------------------------------------------------------------------------
+  // 🟢 CÁLCULO DE ÁNGULOS (PITCH, ROLL Y YAW)
+  // -------------------------------------------------------------------------
+  const ax = telemetria.accel.x;
+  const ay = telemetria.accel.y;
+  const az = telemetria.accel.z;
+  const gz = telemetria.velAngular.z;
+
+  // Inclinaciones trigonométricas en radianes por acelerómetro
+  const pitchRad = Math.atan2(-ax, Math.sqrt(ay * ay + az * az));
+  const rollRad  = Math.atan2(ay, az);
+
+  // Integración de velocidad angular a 50Hz (dt = 0.02s) para el Yaw
+  acumuladorYaw += (gz * 0.02) * (Math.PI / 180);
+  const yawRad = acumuladorYaw;
+
+  // Conversión a Grados sexagesimales para la interfaz
+  const RAD2DEG = 180 / Math.PI;
+  const pitchDeg = (pitchRad * RAD2DEG).toFixed(2);
+  const rollDeg  = (rollRad * RAD2DEG).toFixed(2);
+  const yawDeg   = ((yawRad * RAD2DEG) % 360).toFixed(2);
+
+  // -------------------------------------------------------------------------
+  // 🟢 ACTUALIZAR TARJETAS NUMÉRICAS EN PANTALLA (HTML)
+  // -------------------------------------------------------------------------
+  const txtPitch = document.getElementById("txt-imu-pitch");
+  const txtRoll  = document.getElementById("txt-imu-roll");
+  const txtYaw   = document.getElementById("txt-imu-yaw");
+
+  if (txtPitch) txtPitch.textContent = `${pitchDeg}°`;
+  if (txtRoll)  txtRoll.textContent  = `${rollDeg}°`;
+  if (txtYaw)   txtYaw.textContent   = `${yawDeg}°`;
+
+  // -------------------------------------------------------------------------
+  // 🎯 ROTAR MODELO 3D EN THREE.JS
+  // -------------------------------------------------------------------------
+  if (window.roverMesh) {
+    window.roverMesh.rotation.x = pitchRad;
+    window.roverMesh.rotation.z = rollRad;
+    window.roverMesh.rotation.y = yawRad;
+  }
 
   // Actualizamos gráficas de IMU (acelerómetro / giroscopio)
   actualizarGraficasIMU(
@@ -392,7 +436,14 @@ function actualizarGraficasIMU(ax, ay, az, gx, gy, gz) {
 // ===========================================================================
 // 5. Simulación de prueba (sin hardware conectado)
 // ===========================================================================
+let timerSimulacion = null;
+
 function loopSimulacion() {
+  if (timerSimulacion) {
+    clearTimeout(timerSimulacion);
+    timerSimulacion = null;
+  }
+  
   if (!window.simularActivo) return;
 
   tiempoSimulado += 0.04;
@@ -419,7 +470,7 @@ function loopSimulacion() {
   };
 
   actualizarTelemetria(telemetriaSimulada);
-  setTimeout(loopSimulacion, 20); // ~50Hz
+  timerSimulacion = setTimeout(loopSimulacion, 20); // ~50Hz
 }
 
 // ===========================================================================

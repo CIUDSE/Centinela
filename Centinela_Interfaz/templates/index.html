@@ -366,6 +366,7 @@
     <script>
       // Variables globales para el visor de Three.js ----INICIO GY-87
       let scene, camera, renderer, roverMesh;
+      window.roverMesh = null;
       const contenedor3D = document.getElementById("contenedor-3d-imu");
 
       function inicializarVisualizador3D() {
@@ -400,29 +401,28 @@
         scene.add(gridHelper);
 
         // --- CARGAR MODELO 3D EXTERNO ---
-        roverMesh = new THREE.Group(); // Mantenemos el contenedor global para que el giro funcione igual
-        scene.add(roverMesh);
+        window.roverMesh = new THREE.Group(); // Mantenemos el contenedor global para que el giro funcione igual
+        scene.add(window.roverMesh);
 
         const loader = new THREE.GLTFLoader();
         loader.load(
-          "/static/models/rover.glb", // Ruta a tu archivo 3D ------------------------------------------------------------
+          "{{ url_for('static', filename='models/rover.glb') }}",
           function (gltf) {
             const modelo = gltf.scene;
 
-            // Ajusta la escala si el modelo es demasiado grande o pequeño
-            modelo.scale.set(0.45, 0.45, 0.45);
+          // Escala y posición
+          modelo.scale.set(0.45, 0.45, 0.45);
+          modelo.position.set(0, 0, 0);
 
-            // Centra el modelo en el origen
-            modelo.position.set(0, 0, 0);
-
-            // Lo metemos al grupo que rota con el giroscopio
-            roverMesh.add(modelo);
-          },
-          undefined,
-          function (error) {
-            console.error("Hubo un error cargando el modelo 3D:", error);
-          },
-        );
+          // Agregar al contenedor global
+          window.roverMesh.add(modelo);
+          console.log("✅ Modelo 3D cargado con éxito");
+        },
+        undefined,
+        function (error) {
+          console.error("❌ Error cargando el modelo 3D:", error);
+        }
+      );
 
         // Manejar reajuste de la ventana de forma fluida
         window.addEventListener("resize", () => {
