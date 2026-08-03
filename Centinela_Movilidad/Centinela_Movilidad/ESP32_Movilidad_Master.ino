@@ -7,6 +7,10 @@
 
 #include "CMotor_ESP32.h"
 
+#include "ESP32_Tren_Motriz.h"
+
+#include "Taranis_CH.h"
+
 CRSFforArduino *crsf = nullptr;
 
 void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData);
@@ -15,6 +19,10 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData);
 // Como solo usamos MAX y MIN (ignoramos el centro), cualquier valor >1500
 // se toma como "alto" y cualquier valor <=1500 se toma como "bajo".
 const uint16_t UMBRAL_SWITCH = 1500;
+
+// --- Config PWM del tren motriz (LEDC del ESP32) ---
+#define PWM_FREQ_TREN        20000
+#define PWM_RESOLUTION_TREN  8
 
 // Estructura de datos que se envia por I2C al esclavo del brazo
 struct BrazoCmd {
@@ -41,11 +49,50 @@ void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t veloci
   }
 }
 
+void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch3_raw) {
+  // --- Direccion (canal 1): binaria con zona muerta ---
+  int ch1_centrado = (int)ch1_raw - UMBRAL_SWITCH;
+
+  if (ch1_centrado > ZONA_MUERTA_DIR) {
+    digitalWrite(DIR_FRONT, HIGH);
+    digitalWrite(DIR_BACK, HIGH);
+  } else if (ch1_centrado < -ZONA_MUERTA_DIR) {
+    digitalWrite(DIR_FRONT, LOW);
+    digitalWrite(DIR_BACK, LOW);
+  }
+
+  int potencia = map(ch3_raw, CH_MIN, CH_MAX, 0, 255);
+  potencia = constrain(potencia, 0, 255);
+
+  ledcWrite(DRIVER_1_TREN_MOTRIZ, potencia);
+  ledcWrite(DRIVER_2_TREN_MOTRIZ, potencia);
+  ledcWrite(DRIVER_3_TREN_MOTRIZ, potencia);
+  ledcWrite(DRIVER_4_TREN_MOTRIZ, potencia);
+} 
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+
+  // --- Tren motriz: attach PWM en los 4 drivers ---
+  ledcAttach(DRIVER_1_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_2_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_3_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_4_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+
+  pinMode(DIR_FRONT, OUTPUT);
+  pinMode(DIR_BACK, OUTPUT);
+
+  digitalWrite(DIR_FRONT, HIGH); // estado inicial (adelante) por defecto
+  digitalWrite(DIR_BACK, HIGH);
+
+  // Arranca detenido
+  ledcWrite(DRIVER_1_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_2_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_3_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_4_TREN_MOTRIZ, 0);
 
   crsf = new CRSFforArduino(&Serial2, PIN_CRSF_RX, PIN_CRSF_TX); // RX=16, TX=17
 
@@ -81,35 +128,21 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
     uint16_t ch5_modo = crsf->rcToUs(rcData->value[4]);      // Switch de tren motriz / brazo
     uint16_t ch6_velocidad = crsf->rcToUs(rcData->value[5]); // Switch de rapido / preciso
 
-    // =================================================================
+    /// =================================================================
     // BLOQUE 1: Modo de operacion = TREN MOTRIZ (CH5 en posicion ALTA)
-    // Aqui los 4 sticks controlan las ruedas/motores del rover:
-    // CH1 = direccion, CH3 = potencia de avance/reversa (CH2 y CH4 libres)
+    // CH3 = potencia (todo el rango). Direccion (CH1) pendiente.
     // =================================================================
     if (ch5_modo > UMBRAL_SWITCH) {
+      Serial.println("Modo: TREN MOTRIZ");
 
-      // -------------------------------------------------------------
-      // BLOQUE 1.1: Dentro de tren motriz, velocidad RAPIDA (CH6 alto)
-      // Se usa el rango completo del stick para maxima velocidad,
-      // pensado para desplazamientos largos en terreno despejado.
-      // -------------------------------------------------------------
-      if (ch6_velocidad > UMBRAL_SWITCH) {
-        Serial.println("Modo: TREN MOTRIZ, Velocidad: RAPIDA");
+      controlarTrenMotriz(ch1, ch3);
 
-        // Aqui va la logica real de control de motores a velocidad completa
-        // controlarTrenMotriz(ch3, ch1, 1.0); // factor de velocidad = 100%
-
-      // -------------------------------------------------------------
-      // BLOQUE 1.2: Dentro de tren motriz, velocidad PRECISA (CH6 bajo)
-      // Se reduce el factor de velocidad para maniobras finas,
-      // pensado para acercarse a obstaculos o zonas estrechas.
-      // -------------------------------------------------------------
-      } else {
-        Serial.println("Modo: TREN MOTRIZ, Velocidad: PRECISA");
-
-        // Aqui va la logica real de control de motores a velocidad reducida
-        // controlarTrenMotriz(ch3, ch1, 0.3); // factor de velocidad = 30%
-      }
+      // --- Ifs de modo de velocidad (rapida/precisa) desactivados por ahora ---
+      // if (ch6_velocidad > UMBRAL_SWITCH) {
+      //   Serial.println("Modo: TREN MOTRIZ, Velocidad: RAPIDA");
+      // } else {
+      //   Serial.println("Modo: TREN MOTRIZ, Velocidad: PRECISA");
+      // }
 
     // =================================================================
     // BLOQUE 2: Modo de operacion = BRAZO (CH5 en posicion BAJA)
