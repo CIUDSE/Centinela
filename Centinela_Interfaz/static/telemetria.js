@@ -73,8 +73,11 @@ function parsearTramaLoRa(linea) {
       y: Number(campos[8]),
       z: Number(campos[9]),
     },
-    gps1: { lat: Number(campos[10]), lon: Number(campos[11]) },
-    gps2: { lat: Number(campos[12]), lon: Number(campos[13]) },
+    pitch: campos[10],
+    yaw: campos[11],
+    roll: campos[12],
+    gps1: { lat: Number(campos[13]), lon: Number(campos[14]) },
+    gps2: { lat: Number(campos[15]), lon: Number(campos[16]) },
     temperaturas,
     timestampLocal: Date.now(),
   };

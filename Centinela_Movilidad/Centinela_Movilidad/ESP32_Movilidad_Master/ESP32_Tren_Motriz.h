@@ -9,7 +9,10 @@
   #define DIR_LEFT 25
   #define DIR_RIGHT 19
 
+  #define BRAKE 13
+
   // Zona muerta de direccion (canal 1), en microsegundos respecto al centro
   #define ZONA_MUERTA_DIR 10
+  #define ZONA_MUERTA_GIRO 10
 
 #endif

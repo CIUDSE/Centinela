@@ -52,17 +52,24 @@ void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t veloci
 void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch3_raw) {
   // --- Direccion (canal 1): binaria con zona muerta ---
   int ch1_centrado = (int)ch1_raw - UMBRAL_SWITCH;
+  int direccion = 0; 
 
   if (ch1_centrado > ZONA_MUERTA_DIR) {
+    Serial.println("adelante");
+
     digitalWrite(DIR_RIGHT, HIGH);
     digitalWrite(DIR_LEFT, LOW);
   } else if (ch1_centrado < -ZONA_MUERTA_DIR) {
+    Serial.println("detras");
+
     digitalWrite(DIR_RIGHT, LOW);
     digitalWrite(DIR_LEFT, HIGH);
   }
 
   int potencia = map(ch3_raw, CH_MIN, CH_MAX, 0, 255);
   potencia = constrain(potencia, 0, 255);
+
+  Serial.println("potencia: "); Serial.print(potencia);
 
   ledcWrite(DRIVER_1_TREN_MOTRIZ, potencia);
   ledcWrite(DRIVER_2_TREN_MOTRIZ, potencia);
@@ -82,11 +89,15 @@ void setup() {
   ledcAttach(DRIVER_3_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
   ledcAttach(DRIVER_4_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
 
-  pinMode(DIR_FRONT, OUTPUT);
-  pinMode(DIR_BACK, OUTPUT);
+  pinMode(DIR_LEFT, OUTPUT);
+  pinMode(DIR_RIGHT, OUTPUT);
 
-  digitalWrite(DIR_FRONT, HIGH); // estado inicial (adelante) por defecto
-  digitalWrite(DIR_BACK, HIGH);
+  pinMode(BRAKE, OUTPUT);
+
+  digitalWrite(DIR_LEFT, LOW); // estado inicial (adelante) por defecto
+  digitalWrite(DIR_RIGHT, HIGH);
+
+  digitalWrite(BRAKE, LOW);
 
   // Arranca detenido
   ledcWrite(DRIVER_1_TREN_MOTRIZ, 0);
@@ -135,6 +146,12 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
     if (ch5_modo > UMBRAL_SWITCH) {
       Serial.println("Modo: TREN MOTRIZ");
 
+      if(ch6_velocidad > UMBRAL_SWITCH) {
+        digitalWrite(BRAKE, LOW);
+      } else {
+        digitalWrite(BRAKE, HIGH);
+      }
+
       controlarTrenMotriz(ch1, ch3);
 
       // --- Ifs de modo de velocidad (rapida/precisa) desactivados por ahora ---
@@ -175,11 +192,11 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       }
     }
 
-    Serial.print(" CH1:"); Serial.print(ch1);
-    Serial.print(" CH2:"); Serial.print(ch2);
-    Serial.print(" CH3:"); Serial.print(ch3);
-    Serial.print(" CH4:"); Serial.println(ch4);
-    Serial.print(" CH5 (modo):"); Serial.print(ch5_modo);
-    Serial.print(" CH6 (velocidad):"); Serial.println(ch6_velocidad);
+    // Serial.print(" CH1:"); Serial.print(ch1);
+    // Serial.print(" CH2:"); Serial.print(ch2);
+    // Serial.print(" CH3:"); Serial.print(ch3);
+    // Serial.print(" CH4:"); Serial.println(ch4);
+    // Serial.print(" CH5 (modo):"); Serial.print(ch5_modo);
+    // Serial.print(" CH6 (velocidad):"); Serial.println(ch6_velocidad);
   }
 }

@@ -311,25 +311,17 @@
             Simular movimiento GPS
           </label>
         </div>
-<div id="waypointPanel">
+        <div id="waypointPanel">
+          <label>Latitud</label>
+          <input type="number" id="manualLat" step="0.000001" />
 
-    <label>Latitud</label>
-    <input
-        type="number"
-        id="manualLat"
-        step="0.000001">
+          <label>Longitud</label>
+          <input type="number" id="manualLon" step="0.000001" />
 
-    <label>Longitud</label>
-    <input
-        type="number"
-        id="manualLon"
-        step="0.000001">
-
-<button id="manualWaypointBtn" class="btn-waypoint-manual">
-    Agregar Waypoint Manual
-</button>
-
-</div>
+          <button id="manualWaypointBtn" class="btn-waypoint-manual">
+            Agregar Waypoint Manual
+          </button>
+        </div>
         <div id="map" class="gnss__mapa"></div>
         <div class="route-controls">
           <button id="startRouteBtn" class="btn-route-start">▶ Empezar</button>

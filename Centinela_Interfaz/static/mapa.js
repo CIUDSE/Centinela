@@ -142,61 +142,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // AGREGAR WAYPOINT
   if (waypointButton) {
-
     waypointButton.addEventListener("click", () => {
-
-        addWaypoint(latitude, longitude);
-
+      addWaypoint(latitude, longitude);
     });
+  }
+  const manualButton = document.getElementById("manualWaypointBtn");
 
-}
-const manualButton = document.getElementById("manualWaypointBtn");
-
-if (manualButton) {
-
+  if (manualButton) {
     manualButton.addEventListener("click", () => {
+      const lat = parseFloat(document.getElementById("manualLat").value);
+      const lon = parseFloat(document.getElementById("manualLon").value);
 
-        const lat = parseFloat(document.getElementById("manualLat").value);
-        const lon = parseFloat(document.getElementById("manualLon").value);
+      if (isNaN(lat) || isNaN(lon)) {
+        alert("Ingrese coordenadas válidas");
+        return;
+      }
 
-        if (isNaN(lat) || isNaN(lon)) {
+      addWaypoint(lat, lon);
 
-            alert("Ingrese coordenadas válidas");
-            return;
-
-        }
-
-        addWaypoint(lat, lon);
-
-        document.getElementById("manualLat").value = "";
-        document.getElementById("manualLon").value = "";
-
+      document.getElementById("manualLat").value = "";
+      document.getElementById("manualLon").value = "";
     });
-
-}
-function addWaypoint(lat, lon) {
-
+  }
+  function addWaypoint(lat, lon) {
     const ahora = Date.now();
     const nombreWp = `Waypoint ${waypointCount}`;
 
     const waypoint = {
-        lat: lat,
-        lon: lon,
-        timestamp: ahora,
+      lat: lat,
+      lon: lon,
+      timestamp: ahora,
     };
 
     waypoints.push(waypoint);
 
     eventosRuta.push({
-        tipo: "Waypoint",
-        nombre: nombreWp,
-        lat: lat,
-        lng: lon,
-        timestamp: ahora,
+      tipo: "Waypoint",
+      nombre: nombreWp,
+      lat: lat,
+      lng: lon,
+      timestamp: ahora,
     });
 
-    const waypointMarker = L.marker([lat, lon]).addTo(map)
-        .bindPopup(`
+    const waypointMarker = L.marker([lat, lon]).addTo(map).bindPopup(`
             <b>${nombreWp}</b><br>
             Latitude: ${lat.toFixed(6)}<br>
             Longitude: ${lon.toFixed(6)}
@@ -205,21 +193,20 @@ function addWaypoint(lat, lon) {
     waypointMarkers.push(waypointMarker);
 
     if (recordingRoute) {
-
-        fetch("/api/mission/waypoint", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                latitude: lat,
-                longitude: lon,
-            }),
-        }).catch(() => {});
+      fetch("/api/mission/waypoint", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: lat,
+          longitude: lon,
+        }),
+      }).catch(() => {});
     }
 
     waypointCount++;
-}
+  }
   // =========================================================
   // 📍 FUNCIÓN REUTILIZABLE PARA ACTUALIZAR LA POSICIÓN ROVER
   // =========================================================
@@ -230,10 +217,7 @@ function addWaypoint(lat, lon) {
     // 1. Mover el marcador
     marker.setLatLng([latitude, longitude]);
 
-    // 2. Centrar suavemente el mapa en el Rover
-    map.panTo([latitude, longitude]);
-
-    // 3. Registrar punto si la ruta está activa
+    // 2. Registrar punto si la ruta está activa
     if (recordingRoute) {
       const ahora = Date.now();
 
