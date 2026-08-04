@@ -49,7 +49,7 @@ void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t veloci
   }
 }
 
-void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch3_raw) {
+void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch2_raw, uint16_t ch3_raw) {
   // --- Direccion (canal 1): binaria con zona muerta ---
   int ch1_centrado = (int)ch1_raw - UMBRAL_SWITCH;
   int direccion = 0; 
@@ -69,12 +69,28 @@ void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch3_raw) {
   int potencia = map(ch3_raw, CH_MIN, CH_MAX, 0, 255);
   potencia = constrain(potencia, 0, 255);
 
-  Serial.println("potencia: "); Serial.print(potencia);
+   // --- Giro (canal 2): fraccion -1.0 a 1.0, proporcional a la potencia actual ---
+  int giroRaw = map((int)ch2_raw, CH_MIN, CH_MAX, -255, 255);
+  if (abs(giroRaw) < ZONA_MUERTA_GIRO) {
+    giroRaw = 0;
+  }
 
-  ledcWrite(DRIVER_1_TREN_MOTRIZ, potencia);
-  ledcWrite(DRIVER_2_TREN_MOTRIZ, potencia);
-  ledcWrite(DRIVER_3_TREN_MOTRIZ, potencia);
-  ledcWrite(DRIVER_4_TREN_MOTRIZ, potencia);
+  float giroFrac = giroRaw / 255.0; // -1.0 (a fondo un lado) a 1.0 (a fondo el otro)
+
+  int potIzq = constrain((int)(potencia - giroFrac * potencia), 0, potencia);
+  int potDer = constrain((int)(potencia + giroFrac * potencia), 0, potencia);
+
+  Serial.print("pot izq: "); Serial.println(potIzq);
+  Serial.print(" pot der: "); Serial.println(potDer);
+
+  Serial.print("potencia: "); Serial.println(potencia);
+
+  // Van en lado contrario por eso los drivers de las llantas derechas se les pone potencia de izquierda y viceversa.
+
+  ledcWrite(DRIVER_1_TREN_MOTRIZ, potDer); // lado izquierdo
+  ledcWrite(DRIVER_2_TREN_MOTRIZ, potDer); // lado izquierdo
+  ledcWrite(DRIVER_3_TREN_MOTRIZ, potIzq); // lado derecho
+  ledcWrite(DRIVER_4_TREN_MOTRIZ, potIzq); // lado derecho
 } 
 
 void setup() {
@@ -152,7 +168,7 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
         digitalWrite(BRAKE, HIGH);
       }
 
-      controlarTrenMotriz(ch1, ch3);
+      controlarTrenMotriz(ch1, ch2, ch3);
 
       // --- Ifs de modo de velocidad (rapida/precisa) desactivados por ahora ---
       // if (ch6_velocidad > UMBRAL_SWITCH) {
