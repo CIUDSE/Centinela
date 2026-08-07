@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================
   document.addEventListener("actualizarGPS", (e) => {
     if (chkSimularGPS && chkSimularGPS.checked) {
-      chkSimularGPS.checked = false;
+      return;
     }
 
     const { lat, lng } = e.detail;
