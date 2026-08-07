@@ -7,6 +7,10 @@
 
 #include "CMotor_ESP32.h"
 
+#include "ESP32_Tren_Motriz.h"
+
+#include "Taranis_CH.h"
+
 CRSFforArduino *crsf = nullptr;
 
 void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData);
@@ -15,6 +19,10 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData);
 // Como solo usamos MAX y MIN (ignoramos el centro), cualquier valor >1500
 // se toma como "alto" y cualquier valor <=1500 se toma como "bajo".
 const uint16_t UMBRAL_SWITCH = 1500;
+
+// --- Config PWM del tren motriz (LEDC del ESP32) ---
+#define PWM_FREQ_TREN        20000
+#define PWM_RESOLUTION_TREN  8
 
 // Estructura de datos que se envia por I2C al esclavo del brazo
 struct BrazoCmd {
@@ -41,11 +49,77 @@ void enviarComandoBrazo(uint16_t ch1, uint16_t ch2, uint16_t ch4, uint8_t veloci
   }
 }
 
+void controlarTrenMotriz(uint16_t ch1_raw, uint16_t ch2_raw, uint16_t ch3_raw) {
+  // --- Direccion (canal 1): binaria con zona muerta ---
+  int ch1_centrado = (int)ch1_raw - UMBRAL_SWITCH;
+  int direccion = 0; 
+
+  if (ch1_centrado > ZONA_MUERTA_DIR) {
+    Serial.println("adelante");
+
+    digitalWrite(DIR_RIGHT, HIGH);
+    digitalWrite(DIR_LEFT, LOW);
+  } else if (ch1_centrado < -ZONA_MUERTA_DIR) {
+    Serial.println("detras");
+
+    digitalWrite(DIR_RIGHT, LOW);
+    digitalWrite(DIR_LEFT, HIGH);
+  }
+
+  int potencia = map(ch3_raw, CH_MIN, CH_MAX, 0, 255);
+  potencia = constrain(potencia, 0, 255);
+
+   // --- Giro (canal 2): fraccion -1.0 a 1.0, proporcional a la potencia actual ---
+  int giroRaw = map((int)ch2_raw, CH_MIN, CH_MAX, -255, 255);
+  if (abs(giroRaw) < ZONA_MUERTA_GIRO) {
+    giroRaw = 0;
+  }
+
+  float giroFrac = giroRaw / 255.0; // -1.0 (a fondo un lado) a 1.0 (a fondo el otro)
+
+  int potIzq = constrain((int)(potencia - giroFrac * potencia), 0, potencia);
+  int potDer = constrain((int)(potencia + giroFrac * potencia), 0, potencia);
+
+  Serial.print("pot izq: "); Serial.println(potIzq);
+  Serial.print(" pot der: "); Serial.println(potDer);
+
+  Serial.print("potencia: "); Serial.println(potencia);
+
+  // Van en lado contrario por eso los drivers de las llantas derechas se les pone potencia de izquierda y viceversa.
+
+  ledcWrite(DRIVER_1_TREN_MOTRIZ, potDer); // lado izquierdo
+  ledcWrite(DRIVER_2_TREN_MOTRIZ, potDer); // lado izquierdo
+  ledcWrite(DRIVER_3_TREN_MOTRIZ, potIzq); // lado derecho
+  ledcWrite(DRIVER_4_TREN_MOTRIZ, potIzq); // lado derecho
+} 
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+
+  // --- Tren motriz: attach PWM en los 4 drivers ---
+  ledcAttach(DRIVER_1_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_2_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_3_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+  ledcAttach(DRIVER_4_TREN_MOTRIZ, PWM_FREQ_TREN, PWM_RESOLUTION_TREN);
+
+  pinMode(DIR_LEFT, OUTPUT);
+  pinMode(DIR_RIGHT, OUTPUT);
+
+  pinMode(BRAKE, OUTPUT);
+
+  digitalWrite(DIR_LEFT, LOW); // estado inicial (adelante) por defecto
+  digitalWrite(DIR_RIGHT, HIGH);
+
+  digitalWrite(BRAKE, LOW);
+
+  // Arranca detenido
+  ledcWrite(DRIVER_1_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_2_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_3_TREN_MOTRIZ, 0);
+  ledcWrite(DRIVER_4_TREN_MOTRIZ, 0);
 
   crsf = new CRSFforArduino(&Serial2, PIN_CRSF_RX, PIN_CRSF_TX); // RX=16, TX=17
 
@@ -81,35 +155,27 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
     uint16_t ch5_modo = crsf->rcToUs(rcData->value[4]);      // Switch de tren motriz / brazo
     uint16_t ch6_velocidad = crsf->rcToUs(rcData->value[5]); // Switch de rapido / preciso
 
-    // =================================================================
+    /// =================================================================
     // BLOQUE 1: Modo de operacion = TREN MOTRIZ (CH5 en posicion ALTA)
-    // Aqui los 4 sticks controlan las ruedas/motores del rover:
-    // CH1 = direccion, CH3 = potencia de avance/reversa (CH2 y CH4 libres)
+    // CH3 = potencia (todo el rango). Direccion (CH1) pendiente.
     // =================================================================
     if (ch5_modo > UMBRAL_SWITCH) {
+      Serial.println("Modo: TREN MOTRIZ");
 
-      // -------------------------------------------------------------
-      // BLOQUE 1.1: Dentro de tren motriz, velocidad RAPIDA (CH6 alto)
-      // Se usa el rango completo del stick para maxima velocidad,
-      // pensado para desplazamientos largos en terreno despejado.
-      // -------------------------------------------------------------
-      if (ch6_velocidad > UMBRAL_SWITCH) {
-        Serial.println("Modo: TREN MOTRIZ, Velocidad: RAPIDA");
-
-        // Aqui va la logica real de control de motores a velocidad completa
-        // controlarTrenMotriz(ch3, ch1, 1.0); // factor de velocidad = 100%
-
-      // -------------------------------------------------------------
-      // BLOQUE 1.2: Dentro de tren motriz, velocidad PRECISA (CH6 bajo)
-      // Se reduce el factor de velocidad para maniobras finas,
-      // pensado para acercarse a obstaculos o zonas estrechas.
-      // -------------------------------------------------------------
+      if(ch6_velocidad > UMBRAL_SWITCH) {
+        digitalWrite(BRAKE, LOW);
       } else {
-        Serial.println("Modo: TREN MOTRIZ, Velocidad: PRECISA");
-
-        // Aqui va la logica real de control de motores a velocidad reducida
-        // controlarTrenMotriz(ch3, ch1, 0.3); // factor de velocidad = 30%
+        digitalWrite(BRAKE, HIGH);
       }
+
+      controlarTrenMotriz(ch1, ch2, ch3);
+
+      // --- Ifs de modo de velocidad (rapida/precisa) desactivados por ahora ---
+      // if (ch6_velocidad > UMBRAL_SWITCH) {
+      //   Serial.println("Modo: TREN MOTRIZ, Velocidad: RAPIDA");
+      // } else {
+      //   Serial.println("Modo: TREN MOTRIZ, Velocidad: PRECISA");
+      // }
 
     // =================================================================
     // BLOQUE 2: Modo de operacion = BRAZO (CH5 en posicion BAJA)
@@ -133,7 +199,6 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       // que requieren precision como tomar una muestra u objeto.
       // -------------------------------------------------------------
 
-
       } else {
         Serial.println("Modo: BRAZO, Velocidad: PRECISA");
 
@@ -143,11 +208,11 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcData) {
       }
     }
 
-    Serial.print(" CH1:"); Serial.print(ch1);
-    Serial.print(" CH2:"); Serial.print(ch2);
-    Serial.print(" CH3:"); Serial.print(ch3);
-    Serial.print(" CH4:"); Serial.println(ch4);
-    Serial.print(" CH5 (modo):"); Serial.print(ch5_modo);
-    Serial.print(" CH6 (velocidad):"); Serial.println(ch6_velocidad);
+    // Serial.print(" CH1:"); Serial.print(ch1);
+    // Serial.print(" CH2:"); Serial.print(ch2);
+    // Serial.print(" CH3:"); Serial.print(ch3);
+    // Serial.print(" CH4:"); Serial.println(ch4);
+    // Serial.print(" CH5 (modo):"); Serial.print(ch5_modo);
+    // Serial.print(" CH6 (velocidad):"); Serial.println(ch6_velocidad);
   }
 }

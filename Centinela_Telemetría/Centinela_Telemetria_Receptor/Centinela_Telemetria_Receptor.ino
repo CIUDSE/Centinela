@@ -54,6 +54,10 @@ typedef struct __attribute__((packed))
   int32_t vel_ang_y_32 = 0.0;
   int32_t vel_ang_z_32 = 0.0;
   
+  int16_t pitch_16 = 0.0;               //Valores en °
+  int16_t roll_16 = 0.0;
+  int16_t yaw_16 = 0.0;
+
   //GPS1 (GPS integrado en placa T-Beam)
   int32_t lat1_32 = 0.0;
   int32_t lon1_32 = 0.0;
@@ -67,6 +71,8 @@ typedef struct __attribute__((packed))
 } telemetryData_t;
 
 telemetryData_t telemetryData;
+
+uint16_t numPaqueteRX = 0;
 
 //------------------------------ Setup ----------------------------------//
 void setup() {
@@ -125,7 +131,7 @@ void loop() {
     int rssi = LoRa.packetRssi();
     float snr = LoRa.packetSnr();
 
-    //Conversión de datos 
+    // //Conversión de datos 
     double lat1 = telemetryData.lat1_32 / 1e6;
     double lon1 = telemetryData.lon1_32 / 1e6;
 
@@ -139,6 +145,10 @@ void loop() {
     float accel_y = telemetryData.accel_y_16 / 100.0;
     float accel_z = telemetryData.accel_z_16 / 100.0; 
 
+    float pitch = telemetryData.pitch_16 / 100.0;
+    float roll = telemetryData.roll_16 / 100.0;
+    float yaw = telemetryData.yaw_16 / 100.0;
+
     float temp[DS18B20_CANTIDAD];
     for(int i=0; i<DS18B20_CANTIDAD; i++)
     {
@@ -148,7 +158,7 @@ void loop() {
     char datosCSV[300];
 
     sprintf(datosCSV,
-            "$%c,%u,%u,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n",
+            "$%c,%u,%u,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n",
             telemetryData.id,
             telemetryData.tiempoRecibido,
             telemetryData.numPaquete,
@@ -159,6 +169,9 @@ void loop() {
             accel_x,
             accel_y,
             accel_z,
+            pitch,
+            roll,
+            yaw,
             lat1,
             lon1,
             lat2,
@@ -172,8 +185,7 @@ void loop() {
             temp[6],
             temp[7],
             temp[8],
-            temp[9],
-            temp[10]
+            temp[9]
             );
     Serial.print(datosCSV);
 
@@ -198,40 +210,36 @@ void loop() {
     // Serial.println(")");
 
     // 3. Mostrar en la pantalla OLED
-    updateDisplay(rssi, snr, lat1, lon1, temp[0]);
+     updateDisplay(rssi, snr, lat1, lon1, temp[0], pitch, roll, yaw);
   }
 }
 
 // ------------------------------------------------------------------
 
 // Función para actualizar la pantalla con los datos recibidos
-void updateDisplay(int rssi, float snr, float lat1, float lon1, float temp) 
+void updateDisplay(int rssi, float snr, float lat1, float lon1, float temp, float pitch, float roll, float yaw) 
 {
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
 
-  // Encabezado
   display.println("<< DATOS RECIBIDOS >>");
-  display.drawFastHLine(0, 9, 128, SSD1306_WHITE);  // Línea divisoria
+  display.drawFastHLine(0, 9, 128, SSD1306_WHITE);
 
-  // Datos
-  display.setTextSize(0.5);  // Texto más grande para el mensaje
   display.setCursor(0, 15);
-  //Mostrar todos los datos obtenidos
-  display.print("latitud: ");
+  display.print("lat: ");
   display.println(lat1, 6);
-  display.print("longitud: ");
+  display.print("lon: ");
   display.println(lon1, 6);
-  //display.print("latitud 2: ");
-  //display.println(lat2, 3);
-  // display.print("temperatura: ");
-  // display.println(temp, 3);
-  // display.print("Presion:");
-  // display.println(pres, 3);
 
-  //Métricas (Parte inferior)
-  display.setTextSize(0.5);
+  display.setCursor(0, 33);
+  display.print("P:");
+  display.print(pitch, 1);
+  display.print(" R:");
+  display.print(roll, 1);
+  display.print(" Y:");
+  display.println(yaw, 1);
+
   display.setCursor(0, 48);
   display.print("RSSI: ");
   display.print(rssi);
@@ -239,8 +247,8 @@ void updateDisplay(int rssi, float snr, float lat1, float lon1, float temp)
 
   display.setCursor(0, 56);
   display.print("SNR: ");
-  display.print(snr, 1);  // 1 decimal
+  display.print(snr, 1);
   display.println(" dB");
 
-  display.display();  // Muestra el buffer en la pantalla física
+  display.display();
 }

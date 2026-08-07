@@ -28,13 +28,10 @@ Clase de motor desarrollada especificamente para esp32 y driver de motores MDD10
 #define PIN_I2C_SCL   22
 #define I2C_SLAVE_ADDR_BRAZO  0x08
 
-// Umbral de switches
-#define UMBRAL_SWITCH  1500
-
 #endif
 
 //Declaracion de pines a utilizar de la esp 32. Consideracion de Esp32 Wroom 32 de 38 pines.
-#ifdef MDD10A_ESP32
+#ifndef MDD10A_ESP32
   #define FL_DIR 4 // Front Left Motor DIR pin. DIR 1
   #define FL_PWM 13 // Front Left Motor PWM pin. PWM 1
 
