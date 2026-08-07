@@ -2,12 +2,10 @@
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-Archivo cpp con la declaración de funciones del GY87 para el módulo de telemetría TRANSMISOR/EMISOR implementando LilyGo TTGO T-Beam V1.2
+Archivo cpp con la declaración de funciones del GY87 para el módulo de telemetría.
 
 Link del video sobre como usar los registros: https://youtu.be/M9lZ5Qy5S2s?si=_7S1XLJ0XDP_fVhh
 *****************************************************************************************************************************************/
-
-#define Pines_Telemetria
 #include "Telemetria_Emisor.h"
 #include <math.h>
 
@@ -65,40 +63,9 @@ void inicializarGY87()
   } 
   else 
   {
-    //Serial.println("No responde WHO_AM_I. Revisa I2C/dirección.");
+    Serial.println("No responde WHO_AM_I. Revisa I2C/dirección.");
     //sendMessage("No responde WHO_AM_I. Revisa I2C/dirección.");
   }
-}
-
-// Función para calibrar los offsets en reposo (mantiene la lectura RAW original)
-void calibrarGY87()
-{
-  long sumAx = 0, sumAy = 0, sumAz = 0;
-  long sumGx = 0, sumGy = 0, sumGz = 0;
-  const int N = 500;
-
-  for(int i = 0; i < N; i++) {
-    leerAcelerometro();
-    leerGiroscopio();
-
-    sumAx += RAW_accelX; 
-    sumAy += RAW_accelY; 
-    sumAz += RAW_accelZ;
-
-    sumGx += RAW_gyroX; 
-    sumGy += RAW_gyroY; 
-    sumGz += RAW_gyroZ;
-
-    delay(2);
-  }
-
-  accelX_offset = (sumAx / (float)N) / ACC_SENS * G_TO_MPS2;
-  accelY_offset = (sumAy / (float)N) / ACC_SENS * G_TO_MPS2;
-  accelZ_offset = ((sumAz / (float)N) / ACC_SENS * G_TO_MPS2) - G_TO_MPS2;
-
-  gyroX_offset = (sumGx / (float)N) / GYRO_SENS;
-  gyroY_offset = (sumGy / (float)N) / GYRO_SENS;
-  gyroZ_offset = (sumGz / (float)N) / GYRO_SENS;
 }
 
 void leerAcelerometro()
@@ -129,39 +96,25 @@ void leerGiroscopio()
   processGyroData();
 }
 
-void processAccelData()
-{
-  // Mantiene la fórmula original restando únicamente el offset de calibración
-  accelX_mps2 = (RAW_accelX / ACC_SENS) * G_TO_MPS2 - accelX_offset;
-  accelY_mps2 = (RAW_accelY / ACC_SENS) * G_TO_MPS2 - accelY_offset;
-  accelZ_mps2 = (RAW_accelZ / ACC_SENS) * G_TO_MPS2 - accelZ_offset;
-
-  telemetryData.accelX = accelX_mps2;
-  telemetryData.accelY = accelY_mps2;
-  telemetryData.accelZ = accelZ_mps2;
-
-  // Calculo de la inclinación del acelerómetro
-  pitchAcc = atan2(accelY_mps2, sqrt(accelX_mps2 * accelX_mps2 + accelZ_mps2 * accelZ_mps2)) * 180.0 / M_PI;
-  rollAcc  = atan2(-accelX_mps2, accelZ_mps2) * 180.0 / M_PI;
-
-}
-
 void processGyroData() 
 {
-  // Mantiene la fórmula original restando únicamente el offset de calibración
-  gyroX_dps = (RAW_gyroX / GYRO_SENS) - gyroX_offset;
-  gyroY_dps = (RAW_gyroY / GYRO_SENS) - gyroY_offset;
-  gyroZ_dps = (RAW_gyroZ / GYRO_SENS) - gyroZ_offset;
+  sensorData.vel_ang_x = RAW_gyroX / 131.0;
+  sensorData.vel_ang_y = RAW_gyroY / 131.0; 
+  sensorData.vel_ang_z = RAW_gyroZ / 131.0;
 
-  telemetryData.rotX = gyroX_dps; 
-  telemetryData.rotY = gyroY_dps;
-  telemetryData.rotZ = gyroZ_dps;
-
-  telemetryData.pitch = alpha * (telemetryData.pitch + gyroX_dps * dt) + (1 - alpha) * pitchAcc;
-  telemetryData.roll  = alpha * (telemetryData.roll  + gyroY_dps * dt) + (1 - alpha) * rollAcc;
-  telemetryData.yaw = telemetryData.yaw + gyroZ_dps * dt; 
-
-  if (telemetryData.yaw >= 180.0) telemetryData.yaw -= 360.0;
-  else if (telemetryData.yaw < -180.0) telemetryData.yaw += 360.0;
+  //Valores convertidos a entero para enviar en la telemetría
+  telemetryData.vel_ang_x_32 = (int32_t)(sensorData.vel_ang_x * 100);
+  telemetryData.vel_ang_y_32 = (int32_t)(sensorData.vel_ang_y * 100);
+  telemetryData.vel_ang_z_32 = (int32_t)(sensorData.vel_ang_z * 100);
 }
 
+void processAccelData()
+{
+  sensorData.accel_x = (RAW_accelX / 16384.0)*9.80665;
+  sensorData.accel_y = (RAW_accelY / 16384.0)*9.80665; 
+  sensorData.accel_z = (RAW_accelZ / 16384.0)*9.80665;
+
+  telemetryData.accel_x_16 = (int16_t)(sensorData.accel_x * 100);
+  telemetryData.accel_y_16 = (int16_t)(sensorData.accel_y * 100);
+  telemetryData.accel_z_16 = (int16_t)(sensorData.accel_z * 100); 
+}

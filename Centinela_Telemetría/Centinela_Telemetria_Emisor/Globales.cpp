@@ -1,21 +1,19 @@
-/*
-*****************************
+/*****************************************************************************************************************************
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-Archivo cpp con la declaración de variables y funciones GLOBALES para el módulo de telemetría TRANSMISOR/EMISOR implementando LilyGo TTGO T-Beam V1.2.
+Archivo cpp con la declaración de variables y funciones GLOBALES para el módulo de telemetría.
 En este archivo se encuentran las variables globales, además de las funciones generales que no aplican al resto de archivos de funciones.
-******************************
-*/
-
-#define Pines_Telemetria
+*****************************************************************************************************************************/
 #include "Telemetria_Emisor.h"
 
 //------------------------------------------------------------------------------//
 
-/*
+
 void tonoBuzzerActivacion()
 {
+  digitalWrite(PIN_BUZZER, LOW);
+  /*
   // 3 Beeps.  Largo - Corto - Corto
   digitalWrite(PIN_BUZZER, HIGH);
   delay(800);
@@ -28,9 +26,9 @@ void tonoBuzzerActivacion()
   digitalWrite(PIN_BUZZER, HIGH);
   delay(100);
   digitalWrite(PIN_BUZZER, LOW);
-  delay(100);
+  delay(100);*/
 }
-
+/*
 void tonoBuzzerCorrecto()
 {
   // 3 Beeps.  Corto - Corto - Corto
