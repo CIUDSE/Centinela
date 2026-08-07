@@ -466,7 +466,7 @@ function loopSimulacion() {
       y: Math.cos(tiempoSimulado) * 0.5,
       z: 0.98,
     },
-    gps1: { lat: 32.5027, lon: -117.0038 },
+    gps1: { lat: 51.461658, lon: -112.710701 },
     gps2: { lat: 0, lon: 0 },
     temperaturas: new Array(10).fill(25),
     timestampLocal: Date.now(),
