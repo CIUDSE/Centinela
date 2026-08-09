@@ -57,6 +57,13 @@
         >
           Heist
         </a>
+
+        <a
+          href="/refreshmentDelivery"
+          class="topbar__nav-btn {{ 'topbar__nav-btn--activo' if pagina == 'refreshmentDelivery' else '' }}"
+        >
+          Refreshment Delivery
+        </a>
       </nav>
 
       <span class="topbar__status">
@@ -402,19 +409,19 @@
           function (gltf) {
             const modelo = gltf.scene;
 
-          // Escala y posición
-          modelo.scale.set(0.45, 0.45, 0.45);
-          modelo.position.set(0, 0, 0);
+            // Escala y posición
+            modelo.scale.set(0.45, 0.45, 0.45);
+            modelo.position.set(0, 0, 0);
 
-          // Agregar al contenedor global
-          window.roverMesh.add(modelo);
-          console.log("✅ Modelo 3D cargado con éxito");
-        },
-        undefined,
-        function (error) {
-          console.error("❌ Error cargando el modelo 3D:", error);
-        }
-      );
+            // Agregar al contenedor global
+            window.roverMesh.add(modelo);
+            console.log("✅ Modelo 3D cargado con éxito");
+          },
+          undefined,
+          function (error) {
+            console.error("❌ Error cargando el modelo 3D:", error);
+          },
+        );
 
         // Manejar reajuste de la ventana de forma fluida
         window.addEventListener("resize", () => {

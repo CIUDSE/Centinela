@@ -68,7 +68,12 @@ def snack_run():
     return render_template('index.html', pagina='snackRun')
 
 
+@app.route('/refreshmentDelivery')
+def refreshment_delivery():
+    return render_template('index.html', pagina='refreshmentDelivery')
+
 # -------- FIN DE RUTEO DE PAGINAS --------
+
 
 @app.route('/api/emergencia', methods=['POST'])
 def gestionar_emergencia():
@@ -181,6 +186,8 @@ def obtener_imu():
     return jsonify(datos_telemetria)
 
 # API Única para la Estación Terrena --- Para el mapa
+
+
 @app.route('/api/telemetria', methods=['GET'])
 def obtener_telemetria():
     return datos_telemetria
@@ -194,12 +201,14 @@ def mission_start():
 
     return jsonify({"status": "success"})
 
+
 @app.route("/api/mission/stop", methods=["POST"])
 def mission_stop():
 
     mision_gps.stop()
 
     return jsonify({"status": "success"})
+
 
 @app.route("/api/mission/point", methods=["POST"])
 def mission_point():
@@ -213,6 +222,7 @@ def mission_point():
 
     return jsonify({"status": "success"})
 
+
 @app.route("/api/mission/waypoint", methods=["POST"])
 def mission_waypoint():
 
@@ -224,6 +234,7 @@ def mission_waypoint():
     )
 
     return jsonify({"status": "success"})
+
 
 @app.route('/api/morse', methods=['POST'])
 def enviar_morse():
@@ -262,6 +273,7 @@ def enviar_morse():
         return jsonify({"status": "success", "cadena_morse": cadena_morse}), 200
     except Exception as e:
         return jsonify({"status": "error", "mensaje": str(e)}), 500
+
 
 if __name__ == "__main__":
     # Si quieres pasar la IP de la Raspberry por consola al prender la web:
