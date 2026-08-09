@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   //-------- CREACIÓN DEL MAPA --------
-  const map = L.map("map").setView([32.514, -117.038], 16);
+  const map = L.map("map").setView([51.461658, -112.710701], 16);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   //------ POSICIÓN INICIAL DEL ROVER --------
-  let latitude = 32.514;
-  let longitude = -117.038;
+  let latitude = 51.461658;
+  let longitude = -112.710701;
 
   // ----- MARCADOR INICIAL ROVER -----
   const marker = L.marker([latitude, longitude], { icon: roverIcon }).addTo(
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================
   document.addEventListener("actualizarGPS", (e) => {
     if (chkSimularGPS && chkSimularGPS.checked) {
-      chkSimularGPS.checked = false;
+      return;
     }
 
     const { lat, lng } = e.detail;

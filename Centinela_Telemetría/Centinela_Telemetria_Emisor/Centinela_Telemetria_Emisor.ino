@@ -2,66 +2,58 @@
 Club de Investigación Univesitario de Desarrollo en Sistemas Espaciales
 Misión Centinela
 Código desarrollado por Electrónica Rovers
-Código TRANSMISOR/EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2, Neo6m integrado, MPU 6050, DS18B20.
-
-Para la prueba del envio de datos se utilizo este código en la placa lilygo ttgo t-beam como transmisor, mientras que se uso la lilygo con pantalla
-como receptor utilizando el codigo "ReceptorStruct" en la carpeta de pruebas.
-
-Librerias necesarias:
-LoRa by Sandeep Mistry
-OneWire by Jim Studt...
-DallasTemperature
-TinyGPS+
+Código TRANSMISOR/EMISOR para telemetría general del rover Centinela implementando una LilyGo TTGO T-Beam V1.2.
 
 Estructura de envio de datos:
-telemetryData -> {accelX, accelY, accelZ, rotX, rotY, rotZ, lat1, lon1, lat2, lon2, temp[10]}
+telemetryData -> {ID, Tiempo recibido, Número de paquete, accelX, accelY, accelZ, rotX, rotY, rotZ, lat1, lon1, lat2, lon2, temp[10]}
 **************************************************************************************************************************************************/
-
-//Declaramos configuración de pines 
-#define Pines_Telemetria
 #include "Telemetria_Emisor.h"
-//Banda Lora actual 915E6 ----- Se puede modificar en archivo .h
 
-telemetryData_t telemetryData;
-
-// Variable para control de tiempo no bloqueante (reemplaza al delay)
-unsigned long ultimoEnvio = 0;
-const unsigned long intervaloEnvio = 500; // Tiempo en ms (mismo tiempo de prueba original)
+sensorData_t sensorData;            //Struct utilizado para datos de sensores en sus tipo de datos originales.
+telemetryData_t telemetryData;      //Struct utilizado para envío de datos de telemetria. Aqui todos los datos son de tipo int.
 
 void setup() 
 {
-  //pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion(); //Inicializa buzzer
-  inicializarLora();  //Función para inicializar LoRa.
+  Serial.begin(115200);
+  Serial.println("Inicio codigo");
 
+  //Definir datos
+  telemetryData.id = ID;
+  pinMode(PIN_BUZZER, OUTPUT); tonoBuzzerActivacion();
+
+  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
   Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
-  inicializarGY87();    //Inicializa I2C automaticamente.
-  calibrarGY87();       //Calibración de la IMU al encender
-  inicializarDS18B20(); //Inicializa los sensores de temperatura.
-  inicializarGPS1();    //Inicializa GPS1 (GPS integrado en T-Beam)
-  inicializarGPS2();     //Inicializa GPS2 (GPS Neo6m externo)
-  
+  inicializarLora();  //Función para inicializar LoRa.
+
+  inicializarGY87();                      //Inicializa I2C automaticamente.
+  //inicializarDS18B20();                   //Inicializa los sensores de temperatura.
+  inicializarGPS1(); asegurarGPS1();        //Inicializa GPS1 (GPS integrado en T-Beam)
+  //inicializarGPS2();       //Inicializa GPS2 (GPS Neo6m externo)
 }
 
 void loop() 
 {
-  // Lectura continua de la IMU para alimentar el filtro complementario sin pausas
+  //Datos de telemetría
   leerAcelerometro();
   leerGiroscopio();
-
-  // Lectura continua de buffers GPS
+  //leerDS18B20();
   leerGPS1();
-  leerGPS2();
+  //leerGPS2();
 
-  // Envío por LoRa y sensores lentos cada 500 ms (mismo intervalo original, sin bloquear el flujo)
-  if (millis() - ultimoEnvio >= intervaloEnvio) 
+  Serial.println("Enviando paquete");
+  
+  //Secuencia de envio de datos por LoRa
+  timeoutLora();  // Timeout de seguridad — libera loraEnviando si el callback no se disparó
+
+  if (!loraEnviando)           //Enviar los datos por LoRa
   {
-    ultimoEnvio = millis();
+    tiempoSegundo = millis();
+    contadorPaquetes++;
+    telemetryData.numPaquete = contadorPaquetes;
+    telemetryData.tiempoRecibido = millis() - tiempoRespuesta;
+    tiempoRespuesta = millis();
 
-    leerDS18B20();
     enviarDatos();
   }
-
-  //recibir control
-  //enviar control a esp32
 }
